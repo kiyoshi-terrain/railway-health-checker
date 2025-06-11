@@ -335,13 +335,17 @@ function extractGPSFromPhoto(file) {
     console.log('写真からGPS情報を抽出予定:', file.name);
 }
 
-// 地形地質概況の自動生成
+// 地形地質概況の自動生成（CORS対応版）
 async function generateGeologicalSummary() {
     const lat = document.getElementById('latitude').value;
     const lon = document.getElementById('longitude').value;
     
+    // デバッグ用ログ
+    console.log('緯度:', lat, '経度:', lon);
+    
+    // 緯度・経度の入力チェック
     if (!lat || !lon) {
-        alert('緯度・経度を入力してください');
+        alert('緯度・経度を入力してください。両方の値が必要です。');
         return;
     }
     
@@ -349,10 +353,34 @@ async function generateGeologicalSummary() {
     document.getElementById('loadingOverlay').style.display = 'flex';
     
     try {
-        // 自動評価APIを呼び出し
         const API_BASE = 'https://terrain-eapqpr0vw-kiyoshi-terrains-projects.vercel.app';
-        const response = await fetch(`${API_BASE}/api/v1/terrain/analyze?latitude=${lat}&longitude=${lon}`);
+        const url = `${API_BASE}/api/v1/terrain/analyze?latitude=${lat}&longitude=${lon}`;
+        
+        // デバッグ用：リクエストURLを表示
+        console.log('API Request URL:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                // APIキーが必要な場合はここに追加
+                // 'Authorization': 'Bearer YOUR_API_KEY'
+            },
+            mode: 'cors' // CORS モードを明示的に指定
+        });
+        
+        // レスポンスステータスをログ出力
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        
+        // レスポンスデータをログ出力
+        console.log('Response data:', data);
         
         if (data.success) {
             const terrainData = data.data;
@@ -392,16 +420,38 @@ ${terrainData.terrain_features.disaster_risk.landslide_risk === '中' || terrain
 ${getCheckedDefectsSummary()}
 ${getCheckedInstabilitySummary()}`;
             
-            document.getElementById('geologicalSummary').value = summary;
+            // textareaに結果を表示（.valueを使用）
+            const geologicalSection = document.getElementById('geologicalSummary');
+            if (geologicalSection) {
+                geologicalSection.value = summary;
+            }
         } else {
-            alert('地形データの取得に失敗しました');
+            alert(`地形データの取得に失敗しました: ${data.error || '不明なエラー'}`);
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('エラーが発生しました: ' + error.message);
+        // 詳細なエラー情報を表示
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            url: `${API_BASE}/api/v1/terrain/analyze?latitude=${lat}&longitude=${lon}`
+        });
+        
+        alert(`エラーが発生しました:\n${error.message}\n\nURL: ${API_BASE}/api/v1/terrain/analyze?latitude=${lat}&longitude=${lon}\n\n詳細はコンソールを確認してください。`);
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
+}
+
+// チェックされた変状のサマリーを取得
+function getCheckedDefectsSummary() {
+    // 実装が必要な場合はここに追加
+    return '';
+}
+
+// チェックされた不安定性のサマリーを取得
+function getCheckedInstabilitySummary() {
+    // 実装が必要な場合はここに追加
+    return '';
 }
 
 // 個別の行で自動判定を更新
@@ -832,10 +882,15 @@ function checkAPIKey() {
     return key && key.length > 0;
 }
 
-// AI診断を実行
+// AI診断を実行（CORS対応版）
 async function executeAIEvaluation() {
     const situationText = document.getElementById('situationText').value;
     const apiKey = localStorage.getItem('openai_api_key');
+    
+    // デバッグ用ログ
+    console.log('AI診断開始');
+    console.log('状況説明文字数:', situationText.length);
+    console.log('APIキー設定:', apiKey ? '設定済み' : '未設定');
     
     if (!situationText) {
         alert('現場の状況説明を入力してください');
@@ -852,23 +907,69 @@ async function executeAIEvaluation() {
     
     try {
         // Vercel APIエンドポイントを使用
-        const response = await fetch('https://railway-health-checker-34mst8j5m-kiyoshi-terrains-projects.vercel.app/api/diagnose', {
+        const url = 'https://railway-health-checker-7b7rqe696-kiyoshi-terrains-projects.vercel.app/api/diagnose';
+        
+        // デバッグ用：リクエストURLを表示
+        console.log('API Request URL:', url);
+        
+        const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: situationText, apiKey: apiKey })
+            headers: { 
+                'Content-Type': 'application/json',
+                // 追加のヘッダー（必要に応じて）
+                'Accept': 'application/json'
+            },
+            mode: 'cors', // CORS モードを明示的に指定
+            body: JSON.stringify({ 
+                text: situationText, 
+                apiKey: apiKey 
+            })
         });
         
+        // レスポンスステータスをログ出力
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
         if (!response.ok) {
-            throw new Error('API呼び出しに失敗しました');
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
+            throw new Error(`API呼び出しに失敗しました (${response.status})`);
         }
         
         const data = await response.json();
+        
+        // レスポンスデータをログ出力
+        console.log('Response data:', data);
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
         const aiResponse = data.choices[0].message.content;
         
-        alert(`AI診断結果：\n\n${aiResponse}`);
+        // 診断結果を表示（より見やすい形式で）
+        const resultMessage = `🤖 AI診断結果\n${'='.repeat(50)}\n\n${aiResponse}\n\n${'='.repeat(50)}\n診断日時: ${new Date().toLocaleString('ja-JP')}`;
+        
+        alert(resultMessage);
+        
+        // 診断結果を特記事項に追記するか確認
+        if (confirm('この診断結果を特記事項に追記しますか？')) {
+            const specialNotes = document.getElementById('specialNotes');
+            if (specialNotes) {
+                const timestamp = new Date().toLocaleString('ja-JP');
+                specialNotes.value += `\n\n【AI診断結果：${timestamp}】\n${aiResponse}`;
+            }
+        }
+        
     } catch (error) {
-        alert('診断中にエラーが発生しました');
-        console.error(error);
+        // 詳細なエラー情報を表示
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            url: 'https://railway-health-checker-7b7rqe696-kiyoshi-terrains-projects.vercel.app/api/diagnose'
+        });
+        
+        alert(`診断中にエラーが発生しました:\n${error.message}\n\n詳細はコンソールを確認してください。`);
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
