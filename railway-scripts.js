@@ -852,7 +852,7 @@ async function executeAIEvaluation() {
     
     try {
         // Vercel APIエンドポイントを使用
-        const response = await fetch('https://railway-health-checker-qxyar53f0-kiyoshi-terrains-projects.vercel.app/api/diagnose', {
+        const response = await fetch('https://railway-health-checker-34mst8j5m-kiyoshi-terrains-projects.vercel.app/api/diagnose', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: situationText, apiKey: apiKey })
