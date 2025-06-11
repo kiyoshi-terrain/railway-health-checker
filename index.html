@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚂 鉄道土構造物健全度評価システム v2</title>
+    <link rel="stylesheet" href="railway-styles.css">
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p style="font-size: 1.2em;">解析中...</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🚂 鉄道土構造物健全度評価システム</h1>
+            <div class="version">Version 2.0 - 維持管理標準対応</div>
+        </div>
+        
+        <!-- モード選択 -->
+        <div class="mode-selector">
+            <button class="mode-button" onclick="setMode('auto')">
+                <span class="icon">🤖</span>
+                自動評価モード
+                <br>
+                <small style="font-size: 0.8em; font-weight: normal;">座標から自動で健全度を評価</small>
+            </button>
+            <button class="mode-button active" onclick="setMode('inspection')">
+                <span class="icon">👷</span>
+                点検評価モード
+                <br>
+                <small style="font-size: 0.8em; font-weight: normal;">維持管理標準に基づく評価</small>
+            </button>
+        </div>
+        
+        <!-- メインコンテンツ -->
+        <div class="main-content">
+            <!-- 自動評価モード -->
+            <div class="auto-mode">
+                <h2 style="color: #2a5298; margin-bottom: 20px;">🤖 自動評価モード</h2>
+                <p style="margin-bottom: 30px;">座標を入力すると、地形・地質データから自動的に土構造物の健全度を評価します。</p>
+                
+                <div style="text-align: center; padding: 50px;">
+                    <button class="execute-button" onclick="window.location.href='railway-health-checker.html'">
+                        従来の自動評価システムを起動
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 点検評価モード -->
+            <div class="inspection-mode active">
+                <h2 style="color: #2a5298; margin-bottom: 20px;">👷 点検評価モード</h2>
+                <p style="margin-bottom: 30px;">現場での点検結果を入力し、維持管理標準に基づいて健全度を評価します。</p>
+                
+                <!-- 基本情報入力 -->
+                <div class="basic-info" id="basicInfo">
+                    <h3 onclick="toggleBasicInfo()">📍 調査対象土構造物 諸元データ</h3>
+                    <div class="basic-info-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>のり面管理番号</label>
+                                <input type="text" id="managementNumber" placeholder="例：上り4">
+                            </div>
+                            <div class="form-group">
+                                <label>線名</label>
+                                <select id="lineName">
+                                    <option value="">選択してください</option>
+                                    <option value="custom">手動入力...</option>
+                                    <option value="東海道線">東海道線</option>
+                                    <option value="横須賀線">横須賀線</option>
+                                    <option value="中央線">中央線</option>
+                                </select>
+                                <input type="text" id="lineNameCustom" style="display:none; margin-top:10px;" placeholder="線名を入力">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>駅間</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="stationFrom" placeholder="起点駅名" style="flex: 1;">
+                                    <span>～</span>
+                                    <input type="text" id="stationTo" placeholder="終点駅名" style="flex: 1;">
+                                </div>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>キロ程</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="kmFrom" placeholder="例：1k442m" style="flex: 1;">
+                                    <span>～</span>
+                                    <input type="text" id="kmTo" placeholder="例：1k486m" style="flex: 1;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>対象（構造物種別）</label>
+                                <select id="structureType" onchange="updateChecklists()">
+                                    <option value="">選択してください</option>
+                                    <option value="embankment">盛土</option>
+                                    <option value="cutting">切土</option>
+                                    <option value="natural">自然斜面</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>場所（線別）</label>
+                                <select id="location">
+                                    <option value="">選択してください</option>
+                                    <option value="up-line">上り線側</option>
+                                    <option value="down-line">下り線側</option>
+                                    <option value="left-side">左側</option>
+                                    <option value="right-side">右側</option>
+                                    <option value="both">両側</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>調査日</label>
+                                <input type="date" id="surveyDate" value="">
+                            </div>
+                            <div class="form-group">
+                                <label>天候</label>
+                                <select id="weather">
+                                    <option value="">選択してください</option>
+                                    <option value="晴">晴</option>
+                                    <option value="曇">曇</option>
+                                    <option value="雨">雨</option>
+                                    <option value="雪">雪</option>
+                                    <option value="霧">霧</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>緯度（任意）</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="number" id="latitude" step="0.000001" placeholder="35.123456" style="flex: 1;">
+                                    <button type="button" class="gps-button" onclick="getCurrentLocation()">
+                                        📍 現在地
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>経度（任意）</label>
+                                <input type="number" id="longitude" step="0.000001" placeholder="139.123456">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; text-align: right;">
+                            <button type="button" class="export-button" onclick="exportSurveySheet()">
+                                📄 調査票形式で出力
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 健全度の判定セクション -->
+                <div class="assessment-section" id="assessmentSection">
+                    <h3 onclick="toggleAssessmentSection()">🏥 健全度の判定</h3>
+                    <div class="assessment-section-content">
+                        <p class="section-description">
+                            変状・不安定性の調査結果を入力するか、AI診断で入力したテキストや写真から自動判定できます。
+                            最新の維持管理標準に基づいて、健全度をS・C・B・A・AAの5段階で評価します。
+                        </p>
+                        
+                        <!-- タブシステム -->
+                        <div class="tabs">
+                            <div class="tab active" onclick="switchTab('defects')">🔍 変状</div>
+                            <div class="tab" onclick="switchTab('instability')">⚠️ 不安定性</div>
+                            <div class="tab ai-tab" onclick="switchTab('ai')">🤖 AI診断 ★</div>
+                        </div>
+                        
+                        <!-- 変状タブ -->
+                        <div class="tab-content active" id="defects-tab">
+                            <div id="defects-checklists-container">
+                                <p style="text-align: center; color: #999; padding: 40px;">
+                                    構造物種別を選択してください
+                                </p>
+                            </div>
+                            
+                            <!-- 変状・不安定性詳細テーブル -->
+                            <div class="checklist" style="margin-top: 20px;">
+                                <h4>📊 変状・不安定性の詳細</h4>
+                                <div style="overflow-x: auto;">
+                                    <table class="detail-table">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" style="width: 100px;">のり面管理番号</th>
+                                                <th rowspan="2" style="width: 120px;">キロ程</th>
+                                                <th rowspan="2" style="width: 200px;">判定の要因</th>
+                                                <th rowspan="2">詳細</th>
+                                                <th rowspan="2" style="width: 60px;">写真</th>
+                                                <th rowspan="2" style="width: 80px;">特記参照</th>
+                                                <th rowspan="2" style="width: 60px;">進行の<br>有無</th>
+                                                <th rowspan="2" style="width: 80px;">線路への<br>影響度</th>
+                                                <th colspan="3" style="width: 180px;">健全度判定</th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 60px;">'20</th>
+                                                <th style="width: 60px;">'22</th>
+                                                <th style="width: 60px;">'24</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detailTableBody">
+                                            <tr class="defect-category">
+                                                <td colspan="11" style="background: #e3f2fd; font-weight: bold;">変状</td>
+                                            </tr>
+                                            <tr class="instability-category">
+                                                <td colspan="11" style="background: #fff3e0; font-weight: bold;">不安定性</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="checklist" style="margin-top: 20px;">
+                                <h4>📝 特記事項</h4>
+                                <textarea class="special-notes" id="specialNotes" placeholder="例：
+①当該ブロック全域で吹付工の変状によるモルタル片の剥落の可能性が考えられる。
+②線路側溝の流末付近でゴミ等の堆積により通水不良を生じ、滞水も見られる。
+③公衆災害が懸念される箇所あり。早急な対策が必要。"></textarea>
+                            </div>
+                            
+                            <div class="checklist" style="margin-top: 20px;">
+                                <h4>🎯 総合判定</h4>
+                                <div class="overall-judgment">
+                                    <select id="overallGrade" class="grade-select">
+                                        <option value="">選択してください</option>
+                                        <option value="S">S - 健全</option>
+                                        <option value="C">C - 軽微な変状</option>
+                                        <option value="B">B - 要注意</option>
+                                        <option value="A">A - 要対策</option>
+                                        <option value="AA">AA - 緊急対策必要</option>
+                                    </select>
+                                    <button type="button" class="auto-judge-button" onclick="autoJudgeGrade()">
+                                        🤖 自動判定
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 不安定性タブ -->
+                        <div class="tab-content" id="instability-tab">
+                            <div id="instability-checklists-container">
+                                <p style="text-align: center; color: #999; padding: 40px;">
+                                    構造物種別を選択してください
+                                </p>
+                            </div>
+                            
+                            <div class="checklist" style="margin-top: 20px;">
+                                <h4>🌍 地形地質・立地条件・概況</h4>
+                                <div style="margin-bottom: 10px;">
+                                    <button type="button" class="auto-generate-button" onclick="generateGeologicalSummary()">
+                                        🤖 座標から自動生成
+                                    </button>
+                                    <span style="margin-left: 10px; color: #666; font-size: 0.9em;">
+                                        ※緯度・経度を入力してから実行してください
+                                    </span>
+                                </div>
+                                <textarea id="geologicalSummary" class="geological-summary" placeholder="＜地形・地質＞
+調査対象地は、○○地の○○部を通過する区間である。
+地質は○○が分布している。
+
+＜立地条件＞
+線路敷きの○側が○○に接しており、○側は○○がある。
+
+＜概況＞
+当該箇所は、○○が対象である。"></textarea>
+                            </div>
+                            
+                            <div class="checklist" style="margin-top: 20px;">
+                                <h4>⚠️ 想定被災形態</h4>
+                                <div class="disaster-form-grid">
+                                    <div class="form-group">
+                                        <label>形態</label>
+                                        <select id="disasterType">
+                                            <option value="">選択してください</option>
+                                            <option value="表層崩壊">表層崩壊</option>
+                                            <option value="深いすべり崩壊">深いすべり崩壊</option>
+                                            <option value="土砂崩壊">土砂崩壊</option>
+                                            <option value="岩盤崩壊">岩盤崩壊</option>
+                                            <option value="侵食崩壊">侵食崩壊</option>
+                                            <option value="土石流">土石流</option>
+                                            <option value="落石">落石</option>
+                                            <option value="吹付工の剥落">吹付工の剥落</option>
+                                            <option value="その他">その他</option>
+                                        </select>
+                                        <input type="text" id="disasterTypeOther" style="display:none; margin-top:10px;" placeholder="その他の被災形態を入力">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>発生箇所</label>
+                                        <input type="text" id="disasterLocation" placeholder="例：全域、上り4">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI診断タブ -->
+                        <div class="tab-content" id="ai-tab">
+                            <div class="ai-evaluation">
+                                <h3>🤖 AI診断アシスタント</h3>
+                                <p style="margin-bottom: 20px;">現場の写真と状況説明から、AIが維持管理標準に基づいて健全度を判定します。</p>
+                                
+                                <div class="situation-input">
+                                    <h4 style="margin-bottom: 10px;">📝 現場の状況説明</h4>
+                                    <textarea id="situationText" placeholder="現場の状況を詳しく説明してください。
+
+例：
+・のり面の中腹から常に水が染み出ており、表面が湿っている
+・先月の大雨後から湧水量が増えた気がする
+・のり肩付近に新しいひび割れを発見（長さ約3m、幅2cm）
+・去年はなかった変状が今年になって現れた"></textarea>
+                                </div>
+                                
+                                <div class="photo-upload" style="margin-top: 20px;">
+                                    <div class="upload-area" onclick="document.getElementById('photoInput').click()">
+                                        <div class="upload-icon">📸</div>
+                                        <p style="font-size: 1.1em; margin-bottom: 10px;">クリックまたはドラッグ＆ドロップで写真を追加</p>
+                                        <p style="color: #666; font-size: 0.9em;">複数枚の写真をアップロード可能です</p>
+                                    </div>
+                                    <input type="file" id="photoInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event)">
+                                    <div class="photo-preview" id="photoPreview"></div>
+                                </div>
+                                
+                                <button class="execute-button" onclick="executeAIEvaluation()">
+                                    🔍 AI診断を実行
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- モーダル（変状登録） -->
+    <div class="modal-overlay" id="defectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔍 変状の登録</h3>
+                <button class="modal-close" onclick="closeModal('defectModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>変状の種類</label>
+                    <select id="defectType" style="width: 100%;">
+                        <option value="">選択してください</option>
+                        <optgroup label="土構造物本体">
+                            <option value="き裂">き裂</option>
+                            <option value="はらみ">はらみ</option>
+                            <option value="沈下・すべり">沈下・すべり</option>
+                            <option value="陥没">陥没</option>
+                            <option value="洗掘">洗掘</option>
+                            <option value="ガリ・やせ・植生不活着">ガリ・やせ・植生不活着</option>
+                        </optgroup>
+                        <optgroup label="防護設備">
+                            <option value="のり面工の陥没・不陸">のり面工の陥没・不陸</option>
+                            <option value="のり面工の浮き">のり面工の浮き</option>
+                            <option value="のり面工のき裂">のり面工のき裂</option>
+                            <option value="のり面工の食い違い">のり面工の食い違い</option>
+                            <option value="土留壁・石積壁の沈下">土留壁・石積壁の沈下</option>
+                            <option value="土留壁・石積壁の傾斜">土留壁・石積壁の傾斜</option>
+                            <option value="土留壁・石積壁の食い違い">土留壁・石積壁の食い違い</option>
+                            <option value="土留壁・石積壁のき裂・目地切れ">土留壁・石積壁のき裂・目地切れ</option>
+                        </optgroup>
+                        <optgroup label="排水設備">
+                            <option value="排水設備の破損">排水設備の破損</option>
+                            <option value="排水設備の食い違い">排水設備の食い違い</option>
+                            <option value="排水設備の通水不良">排水設備の通水不良</option>
+                            <option value="土砂・落葉の堆積">土砂・落葉の堆積</option>
+                            <option value="溢水の跡">溢水の跡</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>発生位置（キロ程）</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="defectKm" min="0" placeholder="1" style="width: 80px;">
+                        <span>k</span>
+                        <input type="number" id="defectM" min="0" max="999" placeholder="480" style="width: 100px;">
+                        <span>m付近</span>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>詳細（任意）</label>
+                    <textarea id="defectDetail" placeholder="例：吹付工上方、灌木の成長によるき裂と浮き" style="width: 100%; min-height: 80px;"></textarea>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>📸 写真（任意）</label>
+                    <div class="photo-upload-mini">
+                        <div class="upload-area-mini" onclick="document.getElementById('defectPhotoInput').click()">
+                            <div style="font-size: 2em;">📷</div>
+                            <p style="margin: 5px 0; font-size: 0.9em;">クリックして写真を追加</p>
+                        </div>
+                        <input type="file" id="defectPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleDefectPhotoUpload(event)">
+                        <div class="photo-preview-mini" id="defectPhotoPreview"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-button" onclick="closeModal('defectModal')">キャンセル</button>
+                <button class="register-button defect" onclick="registerDefect()">登録</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- モーダル（不安定性登録） -->
+    <div class="modal-overlay" id="instabilityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ 不安定性の登録</h3>
+                <button class="modal-close" onclick="closeModal('instabilityModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>不安定要因の種類</label>
+                    <select id="instabilityType" style="width: 100%;">
+                        <option value="">選択してください</option>
+                        <optgroup label="立地条件・周辺環境">
+                            <option value="片切片盛">片切片盛</option>
+                            <option value="切盛境界">切盛境界</option>
+                            <option value="腹付盛土">腹付盛土</option>
+                            <option value="落込勾配点">落込勾配点</option>
+                            <option value="谷渡り盛土">谷渡り盛土</option>
+                            <option value="傾斜地盤上の盛土">傾斜地盤上の盛土</option>
+                            <option value="軟弱地盤の盛土">軟弱地盤の盛土</option>
+                            <option value="不安定地盤の盛土">不安定地盤（崖錐、地すべり地等）の盛土</option>
+                            <option value="橋台裏との接合部">橋台裏との接合部</option>
+                            <option value="カルバート等との接合部">カルバート等との接合部</option>
+                            <option value="環境の変化（伐採）">環境の変化（伐採）</option>
+                            <option value="環境の変化（開発）">環境の変化（道路や宅地等の開発）</option>
+                        </optgroup>
+                        <optgroup label="盛土・排水設備・付帯設備">
+                            <option value="のり面が常に湿潤">のり面が常に湿潤</option>
+                            <option value="のり面から湧水がある">のり面から湧水がある</option>
+                            <option value="発生バラストの散布">発生バラストの散布</option>
+                            <option value="排水設備の容量不足">排水設備の容量不足</option>
+                            <option value="排水パイプ等から土砂が流出">排水パイプ等から土砂が流出</option>
+                            <option value="付帯設備周辺からの雨水流入">付帯設備の周辺から盛土のり面への雨水の流入、流下</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>位置（キロ程または範囲）</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="instabilityLocation" placeholder="例：1k450m付近、全域" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>詳細（任意）</label>
+                    <textarea id="instabilityDetail" placeholder="例：吹付工階段の踊り場付近。吹付工壁面から常時湧水が認められる。" style="width: 100%; min-height: 80px;"></textarea>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>📸 写真（任意）</label>
+                    <div class="photo-upload-mini">
+                        <div class="upload-area-mini" onclick="document.getElementById('instabilityPhotoInput').click()">
+                            <div style="font-size: 2em;">📷</div>
+                            <p style="margin: 5px 0; font-size: 0.9em;">クリックして写真を追加</p>
+                        </div>
+                        <input type="file" id="instabilityPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleInstabilityPhotoUpload(event)">
+                        <div class="photo-preview-mini" id="instabilityPhotoPreview"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-button" onclick="closeModal('instabilityModal')">キャンセル</button>
+                <button class="register-button instability" onclick="registerInstability()">登録</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- API設定ボタン -->
+    <button onclick="showAPIKeySettings()" 
+            style="position: fixed; bottom: 20px; right: 20px; 
+                   background: #4CAF50; color: white; 
+                   padding: 10px 20px; border-radius: 25px; 
+                   border: none; cursor: pointer; 
+                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                   z-index: 1000;">
+        ⚙️ API設定
+    </button>
+    
+    <script src="railway-scripts.js"></script>
+</body>
+</html>
