@@ -7,7 +7,7 @@ export default async function handler(request) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization', // ✅ 修正ポイント
   };
 
   // Handle preflight request
