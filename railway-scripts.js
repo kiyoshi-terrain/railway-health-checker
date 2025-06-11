@@ -831,12 +831,19 @@ function checkAPIKey() {
     const key = localStorage.getItem('openai_api_key');
     return key && key.length > 0;
 }
-// AI診断を実行（簡易版）
+
+// AI診断を実行
 async function executeAIEvaluation() {
     const situationText = document.getElementById('situationText').value;
+    const apiKey = localStorage.getItem('openai_api_key');
     
     if (!situationText) {
         alert('現場の状況説明を入力してください');
+        return;
+    }
+    
+    if (!apiKey) {
+        alert('APIキーが設定されていません。\n右下の「⚙️ API設定」ボタンから設定してください。');
         return;
     }
     
@@ -844,40 +851,11 @@ async function executeAIEvaluation() {
     document.getElementById('loadingOverlay').style.display = 'flex';
     
     try {
-        // APIキー確認
-        const apiKey = localStorage.getItem('openai_api_key');
-        if (!apiKey) {
-            alert('APIキーが設定されていません。\n右下の「⚙️ API設定」ボタンから設定してください。');
-            return;
-        }
-        
-        // OpenAI API呼び出し
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        // Vercel APIエンドポイントを使用
+        const response = await fetch('https://railway-health-checker-oc0psn0ue-kiyoshi-terrains-projects.vercel.app/api/diagnose', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'gpt-4-turbo-preview',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `あなたは鉄道土構造物の専門家です。維持管理標準に基づいて健全度を判定してください。
-判定基準：
-- AA: 緊急措置必要
-- A: 要対策
-- B: 要注意
-- C: 軽微な変状
-- S: 健全`
-                    },
-                    {
-                        role: 'user',
-                        content: `次の状況から健全度を判定してください：\n${situationText}`
-                    }
-                ],
-                max_tokens: 500
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: situationText, apiKey: apiKey })
         });
         
         if (!response.ok) {
@@ -887,12 +865,10 @@ async function executeAIEvaluation() {
         const data = await response.json();
         const aiResponse = data.choices[0].message.content;
         
-        // 結果表示
         alert(`AI診断結果：\n\n${aiResponse}`);
-        
     } catch (error) {
-        console.error('エラー:', error);
         alert('診断中にエラーが発生しました');
+        console.error(error);
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
