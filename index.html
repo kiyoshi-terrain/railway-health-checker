@@ -84,12 +84,21 @@
                                 </div>
                             </div>
                             <div class="form-group" style="grid-column: 1 / -1;">
-                                <label>キロ程</label>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <input type="text" id="kmFrom" placeholder="例：1k442m" style="flex: 1;">
-                                    <span>～</span>
-                                    <input type="text" id="kmTo" placeholder="例：1k486m" style="flex: 1;">
-                                </div>
+    <label>キロ程</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="flex: 1;">
+            <input type="number" id="kmFromInput" placeholder="1442" style="width: 100%;" 
+                   oninput="updateKmDisplay('From')">
+            <span id="kmFromDisplay" class="km-display">0k0m</span>
+        </div>
+        <span>～</span>
+        <div style="flex: 1;">
+            <input type="number" id="kmToInput" placeholder="1486" style="width: 100%;" 
+                   oninput="updateKmDisplay('To')">
+            <span id="kmToDisplay" class="km-display">0k0m</span>
+        </div>
+    </div>
+</div>
                             </div>
                             <div class="form-group">
                                 <label>対象（構造物種別）</label>
