@@ -1415,3 +1415,328 @@ function loadHistoryFromStorage() {
 
 // ページ読み込み時に履歴を復元
 document.addEventListener('DOMContentLoaded', loadHistoryFromStorage);
+// ===== チャット機能の実装 =====
+let chatAttachments = [];
+
+// メッセージ送信
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message && chatAttachments.length === 0) return;
+    
+    // ユーザーメッセージを追加
+    addUserMessage(message, chatAttachments);
+    
+    // 入力をクリア
+    input.value = '';
+    adjustTextareaHeight(input);
+    clearAttachments();
+    
+    // タイピングインジケーターを表示
+    showTypingIndicator();
+    
+    // AI診断を実行
+    setTimeout(() => {
+        executeAIChatDiagnosis(message, chatAttachments);
+    }, 1000);
+}
+
+// ユーザーメッセージを追加
+function addUserMessage(text, attachments = []) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageTime = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    
+    let messageHTML = `
+        <div class="message user-message">
+            <div class="message-avatar">👷</div>
+            <div class="message-content">
+                <div class="message-bubble">
+                    ${escapeHtml(text)}
+                    ${attachments.map(att => {
+                        if (att.type === 'image') {
+                            return `<img src="${att.data}" alt="添付画像" class="message-image" onclick="showImageModal(this.src)">`;
+                        } else if (att.type === 'location') {
+                            return `<div class="location-message">📍 ${att.lat}, ${att.lng}</div>`;
+                        }
+                        return '';
+                    }).join('')}
+                </div>
+                <div class="message-time">${messageTime}</div>
+            </div>
+        </div>
+    `;
+    
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+    scrollToBottom();
+}
+
+// ボットメッセージを追加
+function addBotMessage(content) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageTime = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    
+    // タイピングインジケーターを削除
+    removeTypingIndicator();
+    
+    const messageHTML = `
+        <div class="message bot-message">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">
+                <div class="message-bubble">
+                    ${content}
+                </div>
+                <div class="message-time">${messageTime}</div>
+            </div>
+        </div>
+    `;
+    
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+    scrollToBottom();
+}
+
+// AI診断実行（チャット版）
+async function executeAIChatDiagnosis(message, attachments) {
+    const apiKey = localStorage.getItem('openai_api_key');
+    
+    if (!apiKey) {
+        addBotMessage('⚠️ APIキーが設定されていません。右下の「⚙️ API設定」ボタンから設定してください。');
+        return;
+    }
+    
+    try {
+        // 基本情報を収集
+        const structureType = document.getElementById('structureType').value;
+        const location = document.getElementById('location').value;
+        
+        // プロンプトを構築
+        let prompt = message;
+        if (attachments.some(a => a.type === 'location')) {
+            const loc = attachments.find(a => a.type === 'location');
+            prompt += `\n位置情報: 緯度${loc.lat}, 経度${loc.lng}`;
+        }
+        
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages: [
+                    {
+                        role: 'system',
+                        content: `鉄道土構造物維持管理標準の判定ロジック：${JSON.stringify(maintenanceStandard, null, 2)}
+
+あなたは鉄道土構造物の健全度診断の専門家です。
+ユーザーからの情報を基に、維持管理標準に従って診断してください。
+
+回答は以下の形式で、HTMLタグを使って見やすく整形してください：
+<div class="diagnosis-result">
+<h4>📊 診断結果</h4>
+<p><strong>構造物種別：</strong>盛土/切土</p>
+<p><strong>判定項目：</strong>変状名または不安定性要因</p>
+<p><strong>健全度判定：</strong><span class="diagnosis-grade grade-[S/C/B/A/AA]">[S/C/B/A/AA]</span></p>
+<p><strong>判定根拠：</strong>維持管理標準の該当条件</p>
+<p><strong>推奨対策：</strong>必要な措置</p>
+</div>`
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.2,
+                max_tokens: 500
+            })
+        });
+        
+        const data = await response.json();
+        const aiResponse = data.choices[0].message.content;
+        
+        // 診断結果を表示
+        addBotMessage(aiResponse);
+        
+        // 総合判定に反映するか確認
+        setTimeout(() => {
+            if (confirm('この診断結果を総合判定に反映しますか？')) {
+                // 健全度を抽出して総合判定に設定
+                const gradeMatch = aiResponse.match(/grade-([S|C|B|A|AA]+)/);
+                if (gradeMatch) {
+                    document.getElementById('overallGrade').value = gradeMatch[1];
+                    addBotMessage('✅ 総合判定に反映しました。');
+                }
+            }
+        }, 1000);
+        
+    } catch (error) {
+        addBotMessage(`❌ エラーが発生しました: ${error.message}`);
+    }
+}
+
+// 写真添付
+function attachPhoto() {
+    document.getElementById('chatPhotoInput').click();
+}
+
+// 写真アップロード処理
+function handleChatPhotoUpload(event) {
+    const files = event.target.files;
+    
+    for (let file of files) {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                chatAttachments.push({
+                    type: 'image',
+                    data: e.target.result,
+                    name: file.name
+                });
+                updateAttachmentPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+}
+
+// 位置情報添付
+function attachLocation() {
+    if (!navigator.geolocation) {
+        alert('このブラウザは位置情報に対応していません');
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            chatAttachments.push({
+                type: 'location',
+                lat: position.coords.latitude.toFixed(6),
+                lng: position.coords.longitude.toFixed(6)
+            });
+            updateAttachmentPreview();
+            
+            // 基本情報の緯度経度も更新
+            document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+            document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+        },
+        function(error) {
+            alert('位置情報の取得に失敗しました');
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+// 添付ファイルプレビュー更新
+function updateAttachmentPreview() {
+    const preview = document.getElementById('attachmentPreview');
+    const items = document.getElementById('attachmentItems');
+    
+    if (chatAttachments.length === 0) {
+        preview.style.display = 'none';
+        return;
+    }
+    
+    preview.style.display = 'block';
+    items.innerHTML = chatAttachments.map((att, index) => {
+        if (att.type === 'image') {
+            return `<div class="attachment-item">
+                <img src="${att.data}" alt="${att.name}">
+            </div>`;
+        } else if (att.type === 'location') {
+            return `<div class="attachment-item" style="background: #e8f5e9; display: flex; align-items: center; justify-content: center;">
+                📍
+            </div>`;
+        }
+        return '';
+    }).join('');
+}
+
+// 添付ファイルクリア
+function clearAttachments() {
+    chatAttachments = [];
+    updateAttachmentPreview();
+    document.getElementById('chatPhotoInput').value = '';
+}
+
+// Enterキーで送信
+function handleChatKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+// テキストエリアの高さ調整
+function adjustTextareaHeight(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+// 最下部にスクロール
+function scrollToBottom() {
+    const messages = document.getElementById('chatMessages');
+    messages.scrollTop = messages.scrollHeight;
+}
+
+// タイピングインジケーター表示
+function showTypingIndicator() {
+    const messagesContainer = document.getElementById('chatMessages');
+    const indicator = `
+        <div class="message bot-message" id="typingIndicator">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">
+                <div class="message-bubble typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', indicator);
+    scrollToBottom();
+}
+
+// タイピングインジケーター削除
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+// HTMLエスケープ
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// 画像モーダル表示（オプション）
+function showImageModal(src) {
+    // 簡易的な画像拡大表示
+    window.open(src, '_blank');
+}
+
+// チャット履歴をlocalStorageに保存（オプション）
+function saveChatHistory() {
+    const messages = document.getElementById('chatMessages').innerHTML;
+    localStorage.setItem('railway_chat_history', messages);
+}
+
+// チャット履歴を復元（オプション）
+function loadChatHistory() {
+    const saved = localStorage.getItem('railway_chat_history');
+    if (saved) {
+        document.getElementById('chatMessages').innerHTML = saved;
+        scrollToBottom();
+    }
+}
