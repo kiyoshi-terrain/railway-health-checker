@@ -147,6 +147,7 @@ else if (structureType === 'cutting') {
         </div>
     `;
 }
+}
 
 // GPS座標を取得
 function getCurrentLocation() {
