@@ -1,38 +1,25 @@
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(request) {
-  // CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization', // ✅ 修正ポイント
-  };
-
-  // Handle preflight request
+export default async function handler(request, response) {
+  // Node.js形式に変更
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
   if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers });
+    return response.status(200).end();
   }
-
+  
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { ...headers, 'Content-Type': 'application/json' },
-    });
+    return response.status(405).json({ error: 'Method not allowed' });
   }
-
+  
   try {
-    const { text, apiKey } = await request.json();
-
+    const { text, apiKey } = request.body;
+    
     if (!text || !apiKey) {
-      return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
-        status: 400,
-        headers: { ...headers, 'Content-Type': 'application/json' },
-      });
+      return response.status(400).json({ error: 'Missing required parameters' });
     }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -54,17 +41,11 @@ export default async function handler(request) {
         max_tokens: 1000
       }),
     });
-
-    const data = await response.json();
     
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { ...headers, 'Content-Type': 'application/json' },
-    });
+    const data = await openaiResponse.json();
+    return response.status(200).json(data);
+    
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...headers, 'Content-Type': 'application/json' },
-    });
+    return response.status(500).json({ error: error.message });
   }
 }
