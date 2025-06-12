@@ -173,41 +173,6 @@
                                 </p>
                             </div>
                             
-                            <!-- 変状・不安定性詳細テーブル -->
-                            <div class="checklist" style="margin-top: 20px;">
-                                <h4>📊 変状・不安定性の詳細</h4>
-                                <div style="overflow-x: auto;">
-                                    <table class="detail-table">
-                                        <thead>
-                                            <tr>
-                                                <th rowspan="2" style="width: 100px;">のり面管理番号</th>
-                                                <th rowspan="2" style="width: 120px;">キロ程</th>
-                                                <th rowspan="2" style="width: 200px;">判定の要因</th>
-                                                <th rowspan="2">詳細</th>
-                                                <th rowspan="2" style="width: 60px;">写真</th>
-                                                <th rowspan="2" style="width: 80px;">特記参照</th>
-                                                <th rowspan="2" style="width: 60px;">進行の<br>有無</th>
-                                                <th rowspan="2" style="width: 80px;">線路への<br>影響度</th>
-                                                <th colspan="3" style="width: 180px;">健全度判定</th>
-                                            </tr>
-                                            <tr>
-                                                <th style="width: 60px;">'20</th>
-                                                <th style="width: 60px;">'22</th>
-                                                <th style="width: 60px;">'24</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="detailTableBody">
-                                            <tr class="defect-category">
-                                                <td colspan="11" style="background: #e3f2fd; font-weight: bold;">変状</td>
-                                            </tr>
-                                            <tr class="instability-category">
-                                                <td colspan="11" style="background: #fff3e0; font-weight: bold;">不安定性</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            
                             <div class="checklist" style="margin-top: 20px;">
                                 <h4>📝 特記事項</h4>
                                 <textarea class="special-notes" id="specialNotes" placeholder="例：
@@ -705,6 +670,41 @@
                             }
                             </style>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- 変状・不安定性詳細テーブル（タブの外に独立） -->
+                <div class="checklist" style="margin-top: 20px;">
+                    <h4>📊 変状・不安定性の詳細</h4>
+                    <div style="overflow-x: auto;">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="width: 100px;">のり面管理番号</th>
+                                    <th rowspan="2" style="width: 120px;">キロ程</th>
+                                    <th rowspan="2" style="width: 200px;">判定の要因</th>
+                                    <th rowspan="2">詳細</th>
+                                    <th rowspan="2" style="width: 60px;">写真</th>
+                                    <th rowspan="2" style="width: 80px;">特記参照</th>
+                                    <th rowspan="2" style="width: 60px;">進行の<br>有無</th>
+                                    <th rowspan="2" style="width: 80px;">線路への<br>影響度</th>
+                                    <th colspan="3" style="width: 180px;">健全度判定</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 60px;">'20</th>
+                                    <th style="width: 60px;">'22</th>
+                                    <th style="width: 60px;">'24</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailTableBody">
+                                <tr class="defect-category">
+                                    <td colspan="11" style="background: #e3f2fd; font-weight: bold;">変状</td>
+                                </tr>
+                                <tr class="instability-category">
+                                    <td colspan="11" style="background: #fff3e0; font-weight: bold;">不安定性</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
