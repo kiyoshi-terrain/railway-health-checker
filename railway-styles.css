@@ -1103,3 +1103,15 @@ body {
         transform: scale(0.98);
     }
 }
+/* キロ程表示 */
+.km-display {
+    display: block;
+    font-size: 0.9em;
+    color: #2a5298;
+    font-weight: bold;
+    margin-top: 5px;
+    padding: 5px;
+    background: #e3f2fd;
+    border-radius: 4px;
+    text-align: center;
+}
