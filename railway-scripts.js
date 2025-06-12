@@ -8,6 +8,23 @@ let registeredInstabilities = [];
 let tempDefectPhotos = [];  // 変状用の一時的な写真保存
 let tempInstabilityPhotos = [];  // 不安定性用の一時的な写真保存
 
+// キロ程表示を更新
+function updateKmDisplay(type) {
+    const input = document.getElementById(`km${type}Input`);
+    const display = document.getElementById(`km${type}Display`);
+    const value = input.value;
+    
+    if (value) {
+        const num = parseInt(value);
+        const km = Math.floor(num / 1000);
+        const m = num % 1000;
+        display.textContent = `${km}k${m}m`;
+        display.style.color = '#2a5298';
+    } else {
+        display.textContent = '0k0m';
+        display.style.color = '#999';
+    }
+}
 // モード切替
 function setMode(mode) {
     // ボタンの状態更新
