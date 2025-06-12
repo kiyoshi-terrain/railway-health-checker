@@ -883,14 +883,12 @@ function checkAPIKey() {
 }
 
 // AI診断を実行（CORS対応版）
+// AI診断を実行（Vercelを使わず直接OpenAI APIを呼ぶ）
 async function executeAIEvaluation() {
     const situationText = document.getElementById('situationText').value;
     const apiKey = localStorage.getItem('openai_api_key');
     
-    // デバッグ用ログ
     console.log('AI診断開始');
-    console.log('状況説明文字数:', situationText.length);
-    console.log('APIキー設定:', apiKey ? '設定済み' : '未設定');
     
     if (!situationText) {
         alert('現場の状況説明を入力してください');
@@ -902,52 +900,53 @@ async function executeAIEvaluation() {
         return;
     }
     
-    // ローディング表示
     document.getElementById('loadingOverlay').style.display = 'flex';
     
     try {
-        // Vercel APIエンドポイントを使用
-        const url = 'https://railway-health-checker-cbjecoku1-kiyoshi-terrains-projects.vercel.app/api/diagnose';
+        // 直接OpenAI APIを呼ぶ（Vercelを使わない）
+        console.log('OpenAI APIを直接呼び出します');
         
-        // デバッグ用：リクエストURLを表示
-        console.log('API Request URL:', url);
-        
-        const response = await fetch(url, {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                // 追加のヘッダー（必要に応じて）
-                'Accept': 'application/json'
+                'Authorization': `Bearer ${apiKey}`,
             },
-            mode: 'cors', // CORS モードを明示的に指定
-            body: JSON.stringify({ 
-                text: situationText, 
-                apiKey: apiKey 
+            body: JSON.stringify({
+                model: 'gpt-4-turbo-preview',
+                messages: [
+                    {
+                        role: 'system',
+                        content: '鉄道土構造物の専門家として、変状・不安定性の情報から技術的な診断と対策を提案してください。'
+                    },
+                    {
+                        role: 'user',
+                        content: situationText
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 1000
             })
         });
         
-        // レスポンスステータスをログ出力
         console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
         
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('API Error Response:', errorText);
+            console.error('API Error:', errorText);
             throw new Error(`API呼び出しに失敗しました (${response.status})`);
         }
         
         const data = await response.json();
-        
-        // レスポンスデータをログ出力
-        console.log('Response data:', data);
+        console.log('API Response:', data);
         
         if (data.error) {
-            throw new Error(data.error);
+            throw new Error(data.error.message || 'APIエラー');
         }
         
         const aiResponse = data.choices[0].message.content;
         
-        // 診断結果を表示（より見やすい形式で）
+        // 診断結果を表示
         const resultMessage = `🤖 AI診断結果\n${'='.repeat(50)}\n\n${aiResponse}\n\n${'='.repeat(50)}\n診断日時: ${new Date().toLocaleString('ja-JP')}`;
         
         alert(resultMessage);
@@ -962,13 +961,7 @@ async function executeAIEvaluation() {
         }
         
     } catch (error) {
-        // 詳細なエラー情報を表示
-        console.error('Error details:', {
-            message: error.message,
-            stack: error.stack,
-            url: 'https://railway-health-checker-cbjecoku1-kiyoshi-terrains-projects.vercel.app/api/diagnose'
-        });
-        
+        console.error('Error details:', error);
         alert(`診断中にエラーが発生しました:\n${error.message}\n\n詳細はコンソールを確認してください。`);
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
