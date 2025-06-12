@@ -1323,7 +1323,36 @@ async function executeAIEvaluation() {
                 messages: [
                     {
                         role: 'system',
-                        content: `鉄道土構造物維持管理標準の判定ロジック：${JSON.stringify(maintenanceStandard, null, 2)}
+                        content: `鉄道土構造物維持管理標準：
+${maintenanceStandardText || JSON.stringify(maintenanceStandard, null, 2)}
+
+【重要な判定規則】
+1. 上記の維持管理標準に完全準拠して判定すること
+2. 用語を正確に識別：
+   - 「排水溝」「側溝」の問題 → 排水設備の変状
+   - 「のり尻の土砂」 → 不安定性の土砂堆積
+   - 「湧水」 → 必ず不安定性
+3. 構造物種別（盛土/切土）を必ず確認
+4. 判定基準を厳密に適用
+
+【診断手順】
+1. 構造物種別を確認
+2. 変状/不安定性を分類
+3. 正確な項目名を特定
+4. 該当条件を確認
+5. 健全度を判定
+
+【回答形式】
+<div class="diagnosis-result">
+<h4>📊 診断結果</h4>
+<p><strong>構造物種別：</strong>[盛土/切土]</p>
+<p><strong>分類：</strong>[変状/不安定性]</p>
+<p><strong>判定項目：</strong>[正確な項目名]</p>
+<p><strong>該当条件：</strong>[具体的条件]</p>
+<p><strong>健全度判定：</strong><span class="diagnosis-grade grade-[S/C/B/A/AA]">[S/C/B/A/AA]</span></p>
+<p><strong>判定根拠：</strong>[維持管理標準の引用]</p>
+<p><strong>推奨対策：</strong>[具体的対策]</p>
+</div>`
 
 入力文から以下を抽出・判定：
 1. 構造物種別（盛土/切土）
