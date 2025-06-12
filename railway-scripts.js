@@ -907,7 +907,7 @@ async function executeAIEvaluation() {
     
     try {
         // Vercel APIエンドポイントを使用
-        const url = 'https://railway-health-checker-cq3wa1o8q-kiyoshi-terrains-projects.vercel.app/api/diagnose';
+        const url = 'https://railway-health-checker-2fhtnzvza-kiyoshi-terrains-projects.vercel.app/api/diagnose';
         
         // デバッグ用：リクエストURLを表示
         console.log('API Request URL:', url);
@@ -966,7 +966,7 @@ async function executeAIEvaluation() {
         console.error('Error details:', {
             message: error.message,
             stack: error.stack,
-            url: 'https://railway-health-checker-cq3wa1o8q-kiyoshi-terrains-projects.vercel.app/api/diagnose'
+            url: 'https://railway-health-checker-2fhtnzvza-kiyoshi-terrains-projects.vercel.app/api/diagnose'
         });
         
         alert(`診断中にエラーが発生しました:\n${error.message}\n\n詳細はコンソールを確認してください。`);
