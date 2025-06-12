@@ -917,14 +917,14 @@ async function executeAIEvaluation() {
                 messages: [
                     {
                         role: 'system',
-                        content: '鉄道土構造物の維持管理標準に基づいて診断してください。判定基準：AA：列車運行に支障する可能性が高い（緊急対策必要）A：進行性があり対策必要 B：進行性があるが当面監視 C：軽微な変状 S：変状なし 以下の形式で回答：【健全度】AA/A/B/C/S【根拠】変状の進行性と影響度【対策】具体的な措置'
+                        content: '鉄道土構造物の維持管理標準に基づき診断。【変状/不安定性】を識別し【健全度】S/C/B/A/AA【判定要因】維持管理標準の該当項目【対策】を簡潔に回答'
                     },
                     {
                         role: 'user',
                         content: situationText
                     }
                 ],
-                temperature: 0.7,
+                temperature: 0.3,
                 max_tokens: 1000
             })
         });
