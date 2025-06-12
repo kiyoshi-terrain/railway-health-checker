@@ -5,6 +5,19 @@ let rowCounter = 0;
 let uploadedPhotos = [];
 let registeredDefects = [];
 let registeredInstabilities = [];
+// 維持管理標準データ
+let maintenanceStandardText = '';
+
+// 維持管理標準を読み込む
+async function loadMaintenanceStandard() {
+    try {
+        const response = await fetch('maintenance_standard_appendix_3-6.md');
+        maintenanceStandardText = await response.text();
+        console.log('維持管理標準を読み込みました');
+    } catch (error) {
+        console.error('維持管理標準の読み込みエラー:', error);
+    }
+}
 let tempDefectPhotos = [];  // 変状用の一時的な写真保存
 let tempInstabilityPhotos = [];  // 不安定性用の一時的な写真保存
 
@@ -830,7 +843,8 @@ function removeDefect(defectId) {
 }
 
 // 初期化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadMaintenanceStandard();
    // 線名カスタム
    const lineNameSelect = document.getElementById('lineName');
    if (lineNameSelect) {
