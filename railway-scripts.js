@@ -1339,7 +1339,7 @@ async function executeAIEvaluation() {
         const data = await response.json();
         const aiResponse = data.choices[0].message.content;
         
-        alert(`🤖 AI診断結果（維持管理標準完全準拠）\n${'='.repeat(50)}\n\n${aiResponse}\n\n${'='.repeat(50)}`);
+        addDiagnosisToHistory(situationText, aiResponse);
         
     } catch (error) {
         alert(`診断中にエラーが発生しました:\n${error.message}`);
@@ -1347,3 +1347,71 @@ async function executeAIEvaluation() {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 }
+
+// 診断履歴管理機能
+function clearDiagnosisHistory() {
+    if (confirm('診断履歴をすべて削除しますか？')) {
+        document.getElementById('diagnosisHistory').innerHTML = '<p style="text-align: center; color: #999;">診断結果がここに表示されます</p>';
+        localStorage.removeItem('diagnosisHistory');
+    }
+}
+
+function addDiagnosisToHistory(input, result) {
+    const historyDiv = document.getElementById('diagnosisHistory');
+    const timestamp = new Date().toLocaleString('ja-JP');
+    
+    const gradeMatch = result.match(/【健全度】\s*([S|C|B|A|AA]+)/);
+    const grade = gradeMatch ? gradeMatch[1] : '';
+    
+    const diagnosisItem = document.createElement('div');
+    diagnosisItem.className = 'diagnosis-item';
+    diagnosisItem.innerHTML = `
+        <div class="diagnosis-time">${timestamp}</div>
+        <div class="diagnosis-input">入力: ${input}</div>
+        <div class="diagnosis-result">${result}</div>
+        ${grade ? `<span class="health-grade grade-${grade}">健全度: ${grade}</span>` : ''}
+    `;
+    
+    const placeholder = historyDiv.querySelector('p');
+    if (placeholder) placeholder.remove();
+    
+    historyDiv.insertBefore(diagnosisItem, historyDiv.firstChild);
+    saveHistoryToStorage();
+}
+
+function saveHistoryToStorage() {
+    const historyDiv = document.getElementById('diagnosisHistory');
+    const items = historyDiv.querySelectorAll('.diagnosis-item');
+    const history = Array.from(items).map(item => ({
+        time: item.querySelector('.diagnosis-time').textContent,
+        input: item.querySelector('.diagnosis-input').textContent.replace('入力: ', ''),
+        result: item.querySelector('.diagnosis-result').textContent,
+        grade: item.querySelector('.health-grade')?.textContent.replace('健全度: ', '') || ''
+    }));
+    localStorage.setItem('diagnosisHistory', JSON.stringify(history));
+}
+
+function loadHistoryFromStorage() {
+    const saved = localStorage.getItem('diagnosisHistory');
+    if (saved) {
+        const history = JSON.parse(saved);
+        const historyDiv = document.getElementById('diagnosisHistory');
+        if (historyDiv) {
+            historyDiv.innerHTML = '';
+            history.reverse().forEach(item => {
+                const diagnosisItem = document.createElement('div');
+                diagnosisItem.className = 'diagnosis-item';
+                diagnosisItem.innerHTML = `
+                    <div class="diagnosis-time">${item.time}</div>
+                    <div class="diagnosis-input">入力: ${item.input}</div>
+                    <div class="diagnosis-result">${item.result}</div>
+                    ${item.grade ? `<span class="health-grade grade-${item.grade}">健全度: ${item.grade}</span>` : ''}
+                `;
+                historyDiv.appendChild(diagnosisItem);
+            });
+        }
+    }
+}
+
+// ページ読み込み時に履歴を復元
+document.addEventListener('DOMContentLoaded', loadHistoryFromStorage);
