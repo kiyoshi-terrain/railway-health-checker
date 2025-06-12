@@ -1,5 +1,21 @@
 // 鉄道土構造物健全度評価システム v2 JavaScript
-
+// キロ程表示の自動変換機能
+function updateKmDisplay(type) {
+    const input = document.getElementById(`km${type}Input`);
+    const display = document.getElementById(`km${type}Display`);
+    const value = input.value;
+    
+    if (value) {
+        const num = parseInt(value);
+        const km = Math.floor(num / 1000);
+        const m = num % 1000;
+        display.textContent = `${km}k${m}m`;
+        display.style.color = '#2a5298';
+    } else {
+        display.textContent = '0k0m';
+        display.style.color = '#999';
+    }
+}
 // グローバル変数
 let rowCounter = 0;
 let uploadedPhotos = [];
