@@ -594,14 +594,66 @@ function removePhoto(photoId) {
 }
 // モーダル制御
 function openModal(modalId) {
-   const modal = document.getElementById(modalId);
-   if (modal) {
-       modal.style.display = 'flex';
-       if (modalId === 'defectModal') {
-           tempDefectPhotos = [];
-           document.getElementById('defectPhotoPreview').innerHTML = '';
-       }
-   }
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        
+        // 変状モーダルの場合、構造物種別に応じて選択肢を更新
+        if (modalId === 'defectModal') {
+            const structureType = document.getElementById('structureType').value;
+            const defectSelect = document.getElementById('defectType');
+            
+            // 選択肢をクリア
+            defectSelect.innerHTML = '<option value="">選択してください</option>';
+            
+            if (structureType === 'embankment') {
+                // 盛土の変状
+                defectSelect.innerHTML += `
+                    <optgroup label="土構造物本体">
+                        <option value="き裂">き裂</option>
+                        <option value="はらみ">はらみ</option>
+                        <option value="沈下・すべり">沈下・すべり</option>
+                        <option value="陥没">陥没</option>
+                        <option value="洗掘">洗掘</option>
+                        <option value="ガリ・やせ・植生不活着">ガリ・やせ・植生不活着</option>
+                    </optgroup>
+                `;
+            } else if (structureType === 'cutting') {
+                // 切土の変状
+                defectSelect.innerHTML += `
+                    <optgroup label="切土本体">
+                        <option value="き裂">き裂</option>
+                        <option value="沈下・すべり">沈下・すべり</option>
+                        <option value="ガリ・やせ・植生不活着">ガリ・やせ・植生不活着</option>
+                    </optgroup>
+                `;
+            }
+            
+            // 共通の防護設備・排水設備
+            defectSelect.innerHTML += `
+                <optgroup label="防護設備">
+                    <option value="のり面工の陥没・不陸">のり面工の陥没・不陸</option>
+                    <option value="のり面工の浮き">のり面工の浮き</option>
+                    <option value="のり面工のき裂">のり面工のき裂</option>
+                    <option value="のり面工の食い違い">のり面工の食い違い</option>
+                    <option value="土留壁・石積壁の沈下">土留壁・石積壁の沈下</option>
+                    <option value="土留壁・石積壁の傾斜">土留壁・石積壁の傾斜</option>
+                    <option value="土留壁・石積壁の食い違い">土留壁・石積壁の食い違い</option>
+                    <option value="土留壁・石積壁のき裂・目地切れ">土留壁・石積壁のき裂・目地切れ</option>
+                </optgroup>
+                <optgroup label="排水設備">
+                    <option value="排水設備の破損">排水設備の破損</option>
+                    <option value="排水設備の食い違い">排水設備の食い違い</option>
+                    <option value="排水設備の通水不良">排水設備の通水不良</option>
+                    <option value="土砂・落葉の堆積">土砂・落葉の堆積</option>
+                    <option value="溢水の跡">溢水の跡</option>
+                </optgroup>
+            `;
+            
+            tempDefectPhotos = [];
+            document.getElementById('defectPhotoPreview').innerHTML = '';
+        }
+    }
 }
 
 function closeModal(modalId) {
