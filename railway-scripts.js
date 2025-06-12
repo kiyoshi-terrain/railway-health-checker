@@ -8,23 +8,6 @@ let registeredInstabilities = [];
 let tempDefectPhotos = [];  // 変状用の一時的な写真保存
 let tempInstabilityPhotos = [];  // 不安定性用の一時的な写真保存
 
-// キロ程表示を更新
-function updateKmDisplay(type) {
-    const input = document.getElementById(`km${type}Input`);
-    const display = document.getElementById(`km${type}Display`);
-    const value = input.value;
-    
-    if (value) {
-        const num = parseInt(value);
-        const km = Math.floor(num / 1000);
-        const m = num % 1000;
-        display.textContent = `${km}k${m}m`;
-        display.style.color = '#2a5298';
-    } else {
-        display.textContent = '0k0m';
-        display.style.color = '#999';
-    }
-}
 // モード切替
 function setMode(mode) {
     // ボタンの状態更新
@@ -114,39 +97,179 @@ function updateChecklists() {
         `;
     }
     // 切土の場合
-else if (structureType === 'cutting') {
-    // 変状タブ（盛土と同じ形式に統一）
-    defectsContainer.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button class="register-button defect" onclick="openModal('defectModal')">
-                ➕ 変状を登録
-            </button>
-        </div>
-        
-        <div class="defect-list" id="defectList">
-            <h4>📋 登録された変状</h4>
-            <div id="defectItems">
-                <p style="text-align: center; color: #999;">まだ変状が登録されていません</p>
+    else if (structureType === 'cutting') {
+        // 変状タブ
+        defectsContainer.innerHTML = `
+            <div class="checklist">
+                <h4>🔍 切土の変状項目</h4>
+                <div class="checklist-grid">
+                    <div class="check-item">
+                        <input type="checkbox" id="crack" name="defect">
+                        <label for="crack">き裂</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="settlement" name="defect">
+                        <label for="settlement">沈下・すべり</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="gully" name="defect">
+                        <label for="gully">ガリ・やせ・植生不活着</label>
+                    </div>
+                </div>
             </div>
-        </div>
-    `;
-    
-    // 不安定性タブ
-    instabilityContainer.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button class="register-button instability" onclick="openModal('instabilityModal')">
-                ➕ 不安定性を登録
-            </button>
-        </div>
-        
-        <div class="instability-list" id="instabilityList">
-            <h4>📋 登録された不安定性</h4>
-            <div id="instabilityItems">
-                <p style="text-align: center; color: #999;">まだ不安定性が登録されていません</p>
+            
+            <div class="checklist" style="margin-top: 20px;">
+                <h4>🛡️ 切土防護設備の変状項目</h4>
+                <div class="checklist-grid">
+                    <div class="check-item">
+                        <input type="checkbox" id="slope-work-cave" name="defect-protection">
+                        <label for="slope-work-cave">のり面工の陥没・不陸</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="slope-work-float" name="defect-protection">
+                        <label for="slope-work-float">のり面工の浮き</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="slope-work-crack" name="defect-protection">
+                        <label for="slope-work-crack">のり面工のき裂</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="slope-work-gap" name="defect-protection">
+                        <label for="slope-work-gap">のり面工の食い違い</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="retaining-wall-settle" name="defect-protection">
+                        <label for="retaining-wall-settle">土留壁・石積壁の沈下</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="retaining-wall-tilt" name="defect-protection">
+                        <label for="retaining-wall-tilt">土留壁・石積壁の傾斜</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="retaining-wall-gap" name="defect-protection">
+                        <label for="retaining-wall-gap">土留壁・石積壁の食い違い</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="retaining-wall-crack" name="defect-protection">
+                        <label for="retaining-wall-crack">土留壁・石積壁のき裂・目地切れ</label>
+                    </div>
+                </div>
             </div>
-        </div>
-    `;
-}
+            
+            <div class="checklist" style="margin-top: 20px;">
+                <h4>💧 切土排水設備の変状項目</h4>
+                <div class="checklist-grid">
+                    <div class="check-item">
+                        <input type="checkbox" id="drainage-damage" name="defect-drainage">
+                        <label for="drainage-damage">排水設備の破損</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="drainage-gap" name="defect-drainage">
+                        <label for="drainage-gap">排水設備の食い違い</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="drainage-poor" name="defect-drainage">
+                        <label for="drainage-poor">排水設備の通水不良</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="drainage-sediment" name="defect-drainage">
+                        <label for="drainage-sediment">土砂・落葉の堆積</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="drainage-overflow" name="defect-drainage">
+                        <label for="drainage-overflow">溢水の跡</label>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 不安定性タブ
+        instabilityContainer.innerHTML = `
+            <div class="checklist">
+                <h4>🏗️ 立地条件・周辺環境</h4>
+                <div class="checklist-grid">
+                    <div class="check-item">
+                        <input type="checkbox" id="landslide" name="instability">
+                        <label for="landslide">地すべり地</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="alluvial-terrace" name="instability">
+                        <label for="alluvial-terrace">扇状地・段丘の末端部</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="disaster-history" name="instability">
+                        <label for="disaster-history">過去に多くの災害歴がある、あるいは崩壊跡地が存在</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="catchment" name="instability">
+                        <label for="catchment">背後に集水地形等が存在</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="env-deforestation" name="instability">
+                        <label for="env-deforestation">環境の変化（伐採）</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="env-development" name="instability">
+                        <label for="env-development">環境の変化（宅地等の開発）</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checklist" style="margin-top: 20px;">
+                <h4>💧 切土・排水設備・付帯設備</h4>
+                <div class="checklist-grid">
+                    <div class="check-item">
+                        <input type="checkbox" id="slope-spring" name="instability">
+                        <label for="slope-spring">のり面からの湧水</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="permeable-layer" name="instability">
+                        <label for="permeable-layer">極端に透水性が異なる層の存在</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="uneven-surface" name="instability">
+                        <label for="uneven-surface">表層土の分布が不均一</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="rotten-roots" name="instability">
+                        <label for="rotten-roots">伐採木の腐った根の存在</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="overhang" name="instability">
+                        <label for="overhang">オーバーハング部の存在</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="unstable-rocks" name="instability">
+                        <label for="unstable-rocks">不安定な転石・浮石の存在</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="selective-erosion" name="instability">
+                        <label for="selective-erosion">選択侵食を受けている箇所</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="crack-development" name="instability">
+                        <label for="crack-development">割れ目の発達</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="unstable-shoulder" name="instability">
+                        <label for="unstable-shoulder">のり肩部の立木・構造物基礎が不安定</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="debris-accumulation" name="instability">
+                        <label for="debris-accumulation">のり尻や擁壁・柵背面に土砂や岩塊が堆積</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="pipe-soil-outflow" name="instability">
+                        <label for="pipe-soil-outflow">排水パイプから土砂が流出</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="drainage-capacity" name="instability">
+                        <label for="drainage-capacity">排水設備の容量不足</label>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 }
 
 // GPS座標を取得
@@ -595,66 +718,14 @@ function removePhoto(photoId) {
 }
 // モーダル制御
 function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'flex';
-        
-        // 変状モーダルの場合、構造物種別に応じて選択肢を更新
-        if (modalId === 'defectModal') {
-            const structureType = document.getElementById('structureType').value;
-            const defectSelect = document.getElementById('defectType');
-            
-            // 選択肢をクリア
-            defectSelect.innerHTML = '<option value="">選択してください</option>';
-            
-            if (structureType === 'embankment') {
-                // 盛土の変状
-                defectSelect.innerHTML += `
-                    <optgroup label="土構造物本体">
-                        <option value="き裂">き裂</option>
-                        <option value="はらみ">はらみ</option>
-                        <option value="沈下・すべり">沈下・すべり</option>
-                        <option value="陥没">陥没</option>
-                        <option value="洗掘">洗掘</option>
-                        <option value="ガリ・やせ・植生不活着">ガリ・やせ・植生不活着</option>
-                    </optgroup>
-                `;
-            } else if (structureType === 'cutting') {
-                // 切土の変状
-                defectSelect.innerHTML += `
-                    <optgroup label="切土本体">
-                        <option value="き裂">き裂</option>
-                        <option value="沈下・すべり">沈下・すべり</option>
-                        <option value="ガリ・やせ・植生不活着">ガリ・やせ・植生不活着</option>
-                    </optgroup>
-                `;
-            }
-            
-            // 共通の防護設備・排水設備
-            defectSelect.innerHTML += `
-                <optgroup label="防護設備">
-                    <option value="のり面工の陥没・不陸">のり面工の陥没・不陸</option>
-                    <option value="のり面工の浮き">のり面工の浮き</option>
-                    <option value="のり面工のき裂">のり面工のき裂</option>
-                    <option value="のり面工の食い違い">のり面工の食い違い</option>
-                    <option value="土留壁・石積壁の沈下">土留壁・石積壁の沈下</option>
-                    <option value="土留壁・石積壁の傾斜">土留壁・石積壁の傾斜</option>
-                    <option value="土留壁・石積壁の食い違い">土留壁・石積壁の食い違い</option>
-                    <option value="土留壁・石積壁のき裂・目地切れ">土留壁・石積壁のき裂・目地切れ</option>
-                </optgroup>
-                <optgroup label="排水設備">
-                    <option value="排水設備の破損">排水設備の破損</option>
-                    <option value="排水設備の食い違い">排水設備の食い違い</option>
-                    <option value="排水設備の通水不良">排水設備の通水不良</option>
-                    <option value="土砂・落葉の堆積">土砂・落葉の堆積</option>
-                    <option value="溢水の跡">溢水の跡</option>
-                </optgroup>
-            `;
-            
-            tempDefectPhotos = [];
-            document.getElementById('defectPhotoPreview').innerHTML = '';
-        }
-    }
+   const modal = document.getElementById(modalId);
+   if (modal) {
+       modal.style.display = 'flex';
+       if (modalId === 'defectModal') {
+           tempDefectPhotos = [];
+           document.getElementById('defectPhotoPreview').innerHTML = '';
+       }
+   }
 }
 
 function closeModal(modalId) {
