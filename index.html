@@ -307,6 +307,84 @@
 ・去年はなかった変状が今年になって現れた"></textarea>
                                 </div>
                                 
+                                <!-- AI診断結果エリア -->
+                                <div class="diagnosis-chat-container" style="margin-top: 20px;">
+                                    <h4>📊 診断履歴</h4>
+                                    <div id="diagnosisHistory" class="diagnosis-history">
+                                        <p style="text-align: center; color: #999;">診断結果がここに表示されます</p>
+                                    </div>
+                                    <button onclick="clearDiagnosisHistory()" class="clear-history-btn">履歴をクリア</button>
+                                </div>
+                                
+                                <style>
+                                .diagnosis-chat-container {
+                                    background: #f5f5f5;
+                                    padding: 15px;
+                                    border-radius: 8px;
+                                }
+                                
+                                .diagnosis-history {
+                                    max-height: 400px;
+                                    overflow-y: auto;
+                                    background: white;
+                                    padding: 10px;
+                                    border-radius: 5px;
+                                    border: 1px solid #ddd;
+                                }
+                                
+                                .diagnosis-item {
+                                    margin-bottom: 15px;
+                                    padding: 10px;
+                                    border-left: 3px solid #2196F3;
+                                    background: #f9f9f9;
+                                }
+                                
+                                .diagnosis-time {
+                                    font-size: 0.8em;
+                                    color: #666;
+                                }
+                                
+                                .diagnosis-input {
+                                    font-weight: bold;
+                                    color: #333;
+                                    margin: 5px 0;
+                                }
+                                
+                                .diagnosis-result {
+                                    white-space: pre-wrap;
+                                    font-family: monospace;
+                                    font-size: 0.9em;
+                                }
+                                
+                                .clear-history-btn {
+                                    margin-top: 10px;
+                                    background: #ff6b6b;
+                                    color: white;
+                                    border: none;
+                                    padding: 5px 15px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                }
+                                
+                                .clear-history-btn:hover {
+                                    background: #ff5252;
+                                }
+                                
+                                .health-grade {
+                                    display: inline-block;
+                                    padding: 2px 8px;
+                                    border-radius: 3px;
+                                    font-weight: bold;
+                                    margin-left: 5px;
+                                }
+                                
+                                .grade-AA { background: #ff4444; color: white; }
+                                .grade-A { background: #ff9800; color: white; }
+                                .grade-B { background: #ffeb3b; color: black; }
+                                .grade-C { background: #4caf50; color: white; }
+                                .grade-S { background: #2196f3; color: white; }
+                                </style>
+                                
                                 <div class="photo-upload" style="margin-top: 20px;">
                                     <div class="upload-area" onclick="document.getElementById('photoInput').click()">
                                         <div class="upload-icon">📸</div>
