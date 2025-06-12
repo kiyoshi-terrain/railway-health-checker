@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚂 鉄道土構造物健全度評価システム v3</title>
+    <title>🚂 鉄道土構造物健全度評価システム v2</title>
     <link rel="stylesheet" href="railway-styles.css">
 </head>
 <body>
@@ -17,7 +17,7 @@
     <div class="container">
         <div class="header">
             <h1>🚂 鉄道土構造物健全度評価システム</h1>
-            <div class="version">Version 3.0 - チャット式AI診断対応</div>
+            <div class="version">Version 2.0 - 維持管理標準対応</div>
         </div>
         
         <!-- モード選択 -->
@@ -173,6 +173,41 @@
                                 </p>
                             </div>
                             
+                            <!-- 変状・不安定性詳細テーブル -->
+                            <div class="checklist" style="margin-top: 20px;">
+                                <h4>📊 変状・不安定性の詳細</h4>
+                                <div style="overflow-x: auto;">
+                                    <table class="detail-table">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" style="width: 100px;">のり面管理番号</th>
+                                                <th rowspan="2" style="width: 120px;">キロ程</th>
+                                                <th rowspan="2" style="width: 200px;">判定の要因</th>
+                                                <th rowspan="2">詳細</th>
+                                                <th rowspan="2" style="width: 60px;">写真</th>
+                                                <th rowspan="2" style="width: 80px;">特記参照</th>
+                                                <th rowspan="2" style="width: 60px;">進行の<br>有無</th>
+                                                <th rowspan="2" style="width: 80px;">線路への<br>影響度</th>
+                                                <th colspan="3" style="width: 180px;">健全度判定</th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 60px;">'20</th>
+                                                <th style="width: 60px;">'22</th>
+                                                <th style="width: 60px;">'24</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detailTableBody">
+                                            <tr class="defect-category">
+                                                <td colspan="11" style="background: #e3f2fd; font-weight: bold;">変状</td>
+                                            </tr>
+                                            <tr class="instability-category">
+                                                <td colspan="11" style="background: #fff3e0; font-weight: bold;">不安定性</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
                             <div class="checklist" style="margin-top: 20px;">
                                 <h4>📝 特記事項</h4>
                                 <textarea class="special-notes" id="specialNotes" placeholder="例：
@@ -257,454 +292,114 @@
                         
                         <!-- AI診断タブ -->
                         <div class="tab-content" id="ai-tab">
-                            <div class="ai-chat-container">
-                                <!-- チャットヘッダー -->
-                                <div class="chat-header">
-                                    <h3>🤖 AI診断アシスタント</h3>
-                                    <p>現場の状況を教えてください。維持管理標準に基づいて健全度を判定します。</p>
+                            <div class="ai-evaluation">
+                                <h3>🤖 AI診断アシスタント</h3>
+                                <p style="margin-bottom: 20px;">現場の写真と状況説明から、AIが維持管理標準に基づいて健全度を判定します。</p>
+                                
+                                <div class="situation-input">
+                                    <h4 style="margin-bottom: 10px;">📝 現場の状況説明</h4>
+                                    <textarea id="situationText" placeholder="現場の状況を詳しく説明してください。
+
+例：
+・のり面の中腹から常に水が染み出ており、表面が湿っている
+・先月の大雨後から湧水量が増えた気がする
+・のり肩付近に新しいひび割れを発見（長さ約3m、幅2cm）
+・去年はなかった変状が今年になって現れた"></textarea>
                                 </div>
                                 
-                                <!-- チャットメッセージエリア -->
-                                <div class="chat-messages" id="chatMessages">
-                                    <!-- 初期メッセージ -->
-                                    <div class="message bot-message">
-                                        <div class="message-avatar">🤖</div>
-                                        <div class="message-content">
-                                            <div class="message-bubble">
-                                                こんにちは！鉄道土構造物の健全度診断をお手伝いします。<br><br>
-                                                以下の情報を教えてください：<br>
-                                                📝 現場の状況説明<br>
-                                                📸 現場の写真<br>
-                                                📍 GPS位置情報<br><br>
-                                                まずは、どのような変状や不安定性が見られますか？
-                                            </div>
-                                            <div class="message-time"></div>
-                                        </div>
+                                <!-- AI診断結果エリア -->
+                                <div class="diagnosis-chat-container" style="margin-top: 20px;">
+                                    <h4>📊 診断履歴</h4>
+                                    <div id="diagnosisHistory" class="diagnosis-history">
+                                        <p style="text-align: center; color: #999;">診断結果がここに表示されます</p>
                                     </div>
+                                    <button onclick="clearDiagnosisHistory()" class="clear-history-btn">履歴をクリア</button>
                                 </div>
                                 
-                                <!-- 入力エリア -->
-                                <div class="chat-input-container">
-                                    <!-- アクションボタン -->
-                                    <div class="chat-actions">
-                                        <button class="action-btn" onclick="attachPhoto()" title="写真を添付">
-                                            📸
-                                        </button>
-                                        <button class="action-btn" onclick="attachLocation()" title="現在地を送信">
-                                            📍
-                                        </button>
-                                        <input type="file" id="chatPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleChatPhotoUpload(event)">
+                                <style>
+                                .diagnosis-chat-container {
+                                    background: #f5f5f5;
+                                    padding: 15px;
+                                    border-radius: 8px;
+                                }
+                                
+                                .diagnosis-history {
+                                    max-height: 400px;
+                                    overflow-y: auto;
+                                    background: white;
+                                    padding: 10px;
+                                    border-radius: 5px;
+                                    border: 1px solid #ddd;
+                                }
+                                
+                                .diagnosis-item {
+                                    margin-bottom: 15px;
+                                    padding: 10px;
+                                    border-left: 3px solid #2196F3;
+                                    background: #f9f9f9;
+                                }
+                                
+                                .diagnosis-time {
+                                    font-size: 0.8em;
+                                    color: #666;
+                                }
+                                
+                                .diagnosis-input {
+                                    font-weight: bold;
+                                    color: #333;
+                                    margin: 5px 0;
+                                }
+                                
+                                .diagnosis-result {
+                                    white-space: pre-wrap;
+                                    font-family: monospace;
+                                    font-size: 0.9em;
+                                }
+                                
+                                .clear-history-btn {
+                                    margin-top: 10px;
+                                    background: #ff6b6b;
+                                    color: white;
+                                    border: none;
+                                    padding: 5px 15px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                }
+                                
+                                .clear-history-btn:hover {
+                                    background: #ff5252;
+                                }
+                                
+                                .health-grade {
+                                    display: inline-block;
+                                    padding: 2px 8px;
+                                    border-radius: 3px;
+                                    font-weight: bold;
+                                    margin-left: 5px;
+                                }
+                                
+                                .grade-AA { background: #ff4444; color: white; }
+                                .grade-A { background: #ff9800; color: white; }
+                                .grade-B { background: #ffeb3b; color: black; }
+                                .grade-C { background: #4caf50; color: white; }
+                                .grade-S { background: #2196f3; color: white; }
+                                </style>
+                                
+                                <div class="photo-upload" style="margin-top: 20px;">
+                                    <div class="upload-area" onclick="document.getElementById('photoInput').click()">
+                                        <div class="upload-icon">📸</div>
+                                        <p style="font-size: 1.1em; margin-bottom: 10px;">クリックまたはドラッグ＆ドロップで写真を追加</p>
+                                        <p style="color: #666; font-size: 0.9em;">複数枚の写真をアップロード可能です</p>
                                     </div>
-                                    
-                                    <!-- テキスト入力 -->
-                                    <div class="chat-input-wrapper">
-                                        <textarea 
-                                            id="chatInput" 
-                                            class="chat-input" 
-                                            placeholder="現場の状況を入力してください..."
-                                            rows="1"
-                                            onkeypress="handleChatKeyPress(event)"
-                                            oninput="adjustTextareaHeight(this)"></textarea>
-                                        <button class="send-btn" onclick="sendMessage()" id="sendButton">
-                                            <span class="send-icon">➤</span>
-                                        </button>
-                                    </div>
+                                    <input type="file" id="photoInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event)">
+                                    <div class="photo-preview" id="photoPreview"></div>
                                 </div>
                                 
-                                <!-- 添付ファイルプレビュー -->
-                                <div class="attachment-preview" id="attachmentPreview" style="display: none;">
-                                    <div class="attachment-header">
-                                        <span>添付ファイル</span>
-                                        <button onclick="clearAttachments()" class="clear-attachments">✕</button>
-                                    </div>
-                                    <div class="attachment-items" id="attachmentItems"></div>
-                                </div>
+                                <button class="execute-button" onclick="executeAIEvaluation()">
+                                    🔍 AI診断を実行
+                                </button>
                             </div>
-                            
-                            <!-- チャット用のスタイル -->
-                            <style>
-                            /* チャットコンテナ */
-                            .ai-chat-container {
-                                height: 600px;
-                                display: flex;
-                                flex-direction: column;
-                                background: #f5f5f5;
-                                border-radius: 15px;
-                                overflow: hidden;
-                            }
-                            
-                            /* チャットヘッダー */
-                            .chat-header {
-                                background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
-                                color: white;
-                                padding: 20px;
-                                text-align: center;
-                            }
-                            
-                            .chat-header h3 {
-                                margin: 0 0 10px 0;
-                                font-size: 1.4em;
-                            }
-                            
-                            .chat-header p {
-                                margin: 0;
-                                font-size: 0.9em;
-                                opacity: 0.9;
-                            }
-                            
-                            /* メッセージエリア */
-                            .chat-messages {
-                                flex: 1;
-                                overflow-y: auto;
-                                padding: 20px;
-                                background: #ffffff;
-                            }
-                            
-                            /* メッセージスタイル */
-                            .message {
-                                display: flex;
-                                margin-bottom: 20px;
-                                animation: fadeIn 0.3s ease-in;
-                            }
-                            
-                            @keyframes fadeIn {
-                                from { opacity: 0; transform: translateY(10px); }
-                                to { opacity: 1; transform: translateY(0); }
-                            }
-                            
-                            .bot-message {
-                                justify-content: flex-start;
-                            }
-                            
-                            .user-message {
-                                justify-content: flex-end;
-                            }
-                            
-                            .message-avatar {
-                                width: 40px;
-                                height: 40px;
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-size: 1.5em;
-                                margin: 0 10px;
-                                flex-shrink: 0;
-                            }
-                            
-                            .bot-message .message-avatar {
-                                background: #e3f2fd;
-                                order: 0;
-                            }
-                            
-                            .user-message .message-avatar {
-                                background: #e8f5e9;
-                                order: 1;
-                            }
-                            
-                            .message-content {
-                                max-width: 70%;
-                            }
-                            
-                            .message-bubble {
-                                padding: 15px;
-                                border-radius: 15px;
-                                word-wrap: break-word;
-                            }
-                            
-                            .bot-message .message-bubble {
-                                background: #f0f4ff;
-                                border-bottom-left-radius: 5px;
-                            }
-                            
-                            .user-message .message-bubble {
-                                background: #2a5298;
-                                color: white;
-                                border-bottom-right-radius: 5px;
-                            }
-                            
-                            .message-time {
-                                font-size: 0.75em;
-                                color: #999;
-                                margin-top: 5px;
-                                text-align: right;
-                            }
-                            
-                            .user-message .message-time {
-                                text-align: left;
-                            }
-                            
-                            /* 画像メッセージ */
-                            .message-image {
-                                max-width: 200px;
-                                max-height: 200px;
-                                border-radius: 10px;
-                                cursor: pointer;
-                                margin-top: 10px;
-                            }
-                            
-                            /* 位置情報メッセージ */
-                            .location-message {
-                                display: flex;
-                                align-items: center;
-                                gap: 10px;
-                                padding: 10px;
-                                background: #e8f5e9;
-                                border-radius: 10px;
-                                margin-top: 10px;
-                            }
-                            
-                            /* 入力エリア */
-                            .chat-input-container {
-                                border-top: 1px solid #e0e0e0;
-                                background: white;
-                                padding: 15px;
-                            }
-                            
-                            .chat-actions {
-                                display: flex;
-                                gap: 10px;
-                                margin-bottom: 10px;
-                            }
-                            
-                            .action-btn {
-                                width: 40px;
-                                height: 40px;
-                                border: none;
-                                background: #f0f0f0;
-                                border-radius: 50%;
-                                cursor: pointer;
-                                font-size: 1.2em;
-                                transition: all 0.3s;
-                            }
-                            
-                            .action-btn:hover {
-                                background: #e0e0e0;
-                                transform: scale(1.1);
-                            }
-                            
-                            .chat-input-wrapper {
-                                display: flex;
-                                align-items: flex-end;
-                                gap: 10px;
-                            }
-                            
-                            .chat-input {
-                                flex: 1;
-                                border: 2px solid #e0e0e0;
-                                border-radius: 25px;
-                                padding: 12px 20px;
-                                font-size: 16px;
-                                resize: none;
-                                max-height: 120px;
-                                transition: border-color 0.3s;
-                            }
-                            
-                            .chat-input:focus {
-                                outline: none;
-                                border-color: #2a5298;
-                            }
-                            
-                            .send-btn {
-                                width: 45px;
-                                height: 45px;
-                                border: none;
-                                background: #2a5298;
-                                color: white;
-                                border-radius: 50%;
-                                cursor: pointer;
-                                transition: all 0.3s;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            }
-                            
-                            .send-btn:hover {
-                                background: #1e3c72;
-                                transform: scale(1.05);
-                            }
-                            
-                            .send-btn:disabled {
-                                background: #ccc;
-                                cursor: not-allowed;
-                            }
-                            
-                            .send-icon {
-                                font-size: 1.2em;
-                            }
-                            
-                            /* 添付ファイルプレビュー */
-                            .attachment-preview {
-                                position: absolute;
-                                bottom: 100%;
-                                left: 0;
-                                right: 0;
-                                background: white;
-                                border: 1px solid #e0e0e0;
-                                border-bottom: none;
-                                border-radius: 10px 10px 0 0;
-                                padding: 10px;
-                                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-                            }
-                            
-                            .attachment-header {
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                margin-bottom: 10px;
-                            }
-                            
-                            .clear-attachments {
-                                background: none;
-                                border: none;
-                                font-size: 1.2em;
-                                cursor: pointer;
-                                color: #999;
-                            }
-                            
-                            .attachment-items {
-                                display: flex;
-                                gap: 10px;
-                                flex-wrap: wrap;
-                            }
-                            
-                            .attachment-item {
-                                width: 60px;
-                                height: 60px;
-                                border-radius: 8px;
-                                overflow: hidden;
-                                position: relative;
-                            }
-                            
-                            .attachment-item img {
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                            }
-                            
-                            /* 診断結果の特別なスタイル */
-                            .diagnosis-result {
-                                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-                                padding: 20px;
-                                border-radius: 10px;
-                                margin-top: 10px;
-                            }
-                            
-                            .diagnosis-grade {
-                                display: inline-block;
-                                padding: 5px 15px;
-                                border-radius: 20px;
-                                font-weight: bold;
-                                margin: 5px 0;
-                            }
-                            
-                            .grade-AA { background: #ff4444; color: white; }
-                            .grade-A { background: #ff9800; color: white; }
-                            .grade-B { background: #ffeb3b; color: black; }
-                            .grade-C { background: #4caf50; color: white; }
-                            .grade-S { background: #2196f3; color: white; }
-                            
-                            /* タイピングインジケーター */
-                            .typing-indicator {
-                                display: flex;
-                                align-items: center;
-                                gap: 5px;
-                                padding: 15px;
-                            }
-                            
-                            .typing-dot {
-                                width: 8px;
-                                height: 8px;
-                                background: #999;
-                                border-radius: 50%;
-                                animation: typing 1.4s infinite ease-in-out;
-                            }
-                            
-                            .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-                            .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-                            
-                            @keyframes typing {
-                                0%, 80%, 100% {
-                                    transform: scale(0.8);
-                                    opacity: 0.5;
-                                }
-                                40% {
-                                    transform: scale(1);
-                                    opacity: 1;
-                                }
-                            }
-                            
-                            /* スクロールバーのスタイリング */
-                            .chat-messages::-webkit-scrollbar {
-                                width: 8px;
-                            }
-                            
-                            .chat-messages::-webkit-scrollbar-track {
-                                background: #f1f1f1;
-                            }
-                            
-                            .chat-messages::-webkit-scrollbar-thumb {
-                                background: #888;
-                                border-radius: 4px;
-                            }
-                            
-                            .chat-messages::-webkit-scrollbar-thumb:hover {
-                                background: #555;
-                            }
-                            
-                            /* レスポンシブ対応 */
-                            @media (max-width: 768px) {
-                                .ai-chat-container {
-                                    height: 500px;
-                                }
-                                
-                                .message-content {
-                                    max-width: 85%;
-                                }
-                                
-                                .message-avatar {
-                                    width: 35px;
-                                    height: 35px;
-                                    font-size: 1.2em;
-                                }
-                            }
-                            </style>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- 変状・不安定性詳細テーブル（タブの外に独立） -->
-                <div class="checklist" style="margin-top: 20px;">
-                    <h4>📊 変状・不安定性の詳細</h4>
-                    <div style="overflow-x: auto;">
-                        <table class="detail-table">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2" style="width: 100px;">のり面管理番号</th>
-                                    <th rowspan="2" style="width: 120px;">キロ程</th>
-                                    <th rowspan="2" style="width: 200px;">判定の要因</th>
-                                    <th rowspan="2">詳細</th>
-                                    <th rowspan="2" style="width: 60px;">写真</th>
-                                    <th rowspan="2" style="width: 80px;">特記参照</th>
-                                    <th rowspan="2" style="width: 60px;">進行の<br>有無</th>
-                                    <th rowspan="2" style="width: 80px;">線路への<br>影響度</th>
-                                    <th colspan="3" style="width: 180px;">健全度判定</th>
-                                </tr>
-                                <tr>
-                                    <th style="width: 60px;">'20</th>
-                                    <th style="width: 60px;">'22</th>
-                                    <th style="width: 60px;">'24</th>
-                                </tr>
-                            </thead>
-                            <tbody id="detailTableBody">
-                                <tr class="defect-category">
-                                    <td colspan="11" style="background: #e3f2fd; font-weight: bold;">変状</td>
-                                </tr>
-                                <tr class="instability-category">
-                                    <td colspan="11" style="background: #fff3e0; font-weight: bold;">不安定性</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
