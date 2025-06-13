@@ -86,11 +86,9 @@
                             <div class="form-group" style="grid-column: 1 / -1;">
                                 <label>キロ程</label>
                                 <div style="display: flex; gap: 10px; align-items: center;">
-                                    <input type="number" id="kmFromInput" placeholder="例: 1442" oninput="updateKmDisplay('From')" style="flex: 1;">
-                                    <span id="kmFromDisplay" style="margin-left: 10px; font-weight: bold; color: #999;">0k0m</span>
+                                    <input type="number" id="kmFromInput" placeholder="例: 1442" style="flex: 1;">
                                     <span>～</span>
-                                    <input type="number" id="kmToInput" placeholder="例: 2100" oninput="updateKmDisplay('To')" style="flex: 1;">
-                                    <span id="kmToDisplay" style="margin-left: 10px; font-weight: bold; color: #999;">0k0m</span>
+                                    <input type="text" id="kmTo" placeholder="例：1k486m" style="flex: 1;">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -540,139 +538,6 @@
             <div class="modal-footer">
                 <button class="cancel-button" onclick="closeModal('instabilityModal')">キャンセル</button>
                 <button class="register-button instability" onclick="registerInstability()">登録</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- モーダル（切土変状登録） -->
-    <div class="modal-overlay" id="cuttingDefectModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🏔️ 切土防護設備の変状登録</h3>
-                <button class="modal-close" onclick="closeModal('cuttingDefectModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>変状の種類</label>
-                    <select id="cuttingDefectType" style="width: 100%;">
-                        <option value="">選択してください</option>
-                        <optgroup label="切土本体の変状">
-                            <option value="き裂">き裂</option>
-                            <option value="沈下・すべり">沈下・すべり</option>
-                            <option value="ガリ・やせ・植生不活着">ガリ・やせ・植生不活着</option>
-                        </optgroup>
-                        <optgroup label="切土防護設備の変状">
-                            <option value="のり面工の陥没・不陸">のり面工の陥没・不陸</option>
-                            <option value="のり面工の浮き">のり面工の浮き</option>
-                            <option value="のり面工のき裂">のり面工のき裂</option>
-                            <option value="のり面工の食い違い">のり面工の食い違い</option>
-                            <option value="土留壁・石積壁の沈下">土留壁・石積壁の沈下</option>
-                            <option value="土留壁・石積壁の傾斜">土留壁・石積壁の傾斜</option>
-                            <option value="土留壁・石積壁の食い違い">土留壁・石積壁の食い違い</option>
-                            <option value="土留壁・石積壁のき裂・目地切れ">土留壁・石積壁のき裂・目地切れ</option>
-                        </optgroup>
-                        <optgroup label="排水設備の変状">
-                            <option value="排水設備の破損">排水設備の破損</option>
-                            <option value="排水設備の食い違い">排水設備の食い違い</option>
-                            <option value="排水設備の通水不良">排水設備の通水不良</option>
-                            <option value="土砂・落葉の堆積">土砂・落葉の堆積</option>
-                            <option value="溢水の跡">溢水の跡</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>発生位置（キロ程）</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="number" id="cuttingDefectKm" min="0" placeholder="1" style="width: 80px;">
-                        <span>k</span>
-                        <input type="number" id="cuttingDefectM" min="0" max="999" placeholder="480" style="width: 100px;">
-                        <span>m付近</span>
-                    </div>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>詳細（任意）</label>
-                    <textarea id="cuttingDefectDetail" placeholder="例：吹付工上方、灌木の成長によるき裂と浮き" style="width: 100%; min-height: 80px;"></textarea>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>📸 写真（任意）</label>
-                    <div class="photo-upload-mini">
-                        <div class="upload-area-mini" onclick="document.getElementById('cuttingDefectPhotoInput').click()">
-                            <div style="font-size: 2em;">📷</div>
-                            <p style="margin: 5px 0; font-size: 0.9em;">クリックして写真を追加</p>
-                        </div>
-                        <input type="file" id="cuttingDefectPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleCuttingDefectPhotoUpload(event)">
-                        <div class="photo-preview-mini" id="cuttingDefectPhotoPreview"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="cancel-button" onclick="closeModal('cuttingDefectModal')">キャンセル</button>
-                <button class="register-button defect" onclick="registerCuttingDefect()">登録</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- モーダル（切土不安定性登録） -->
-    <div class="modal-overlay" id="cuttingInstabilityModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>⚠️ 切土の不安定性登録</h3>
-                <button class="modal-close" onclick="closeModal('cuttingInstabilityModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>不安定要因の種類</label>
-                    <select id="cuttingInstabilityType" style="width: 100%;">
-                        <option value="">選択してください</option>
-                        <optgroup label="立地条件・周辺環境">
-                            <option value="地すべり地">地すべり地</option>
-                            <option value="扇状地・段丘の末端部">扇状地・段丘の末端部</option>
-                            <option value="過去に多くの災害歴がある">過去に多くの災害歴がある、あるいは崩壊跡地が存在</option>
-                            <option value="背後に集水地形等が存在">背後に集水地形等が存在</option>
-                            <option value="環境の変化（伐採）">環境の変化（伐採）</option>
-                            <option value="環境の変化（宅地等の開発）">環境の変化（宅地等の開発）</option>
-                        </optgroup>
-                        <optgroup label="切土・排水設備・付帯設備">
-                            <option value="のり面からの湧水">のり面からの湧水</option>
-                            <option value="極端に透水性が異なる層の存在">極端に透水性が異なる層の存在</option>
-                            <option value="表層土の分布が不均一">表層土の分布が不均一</option>
-                            <option value="伐採木の腐った根の存在">伐採木の腐った根の存在</option>
-                            <option value="オーバーハング部の存在">オーバーハング部の存在</option>
-                            <option value="不安定な転石・浮石の存在">不安定な転石・浮石の存在</option>
-                            <option value="選択侵食を受けている箇所">選択侵食を受けている箇所</option>
-                            <option value="割れ目の発達">割れ目の発達</option>
-                            <option value="のり肩部の立木・構造物基礎が不安定">のり肩部の立木・構造物基礎が不安定</option>
-                            <option value="のり尻や擁壁・柵背面に土砂や岩塊が堆積">のり尻や擁壁・柵背面に土砂や岩塊が堆積</option>
-                            <option value="排水パイプから土砂が流出">排水パイプから土砂が流出</option>
-                            <option value="排水設備の容量不足">排水設備の容量不足</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>位置（キロ程または範囲）</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" id="cuttingInstabilityLocation" placeholder="例：1k450m付近、全域" style="width: 100%;">
-                    </div>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>詳細（任意）</label>
-                    <textarea id="cuttingInstabilityDetail" placeholder="例：豪雨時に湧水量が増加する傾向がある。" style="width: 100%; min-height: 80px;"></textarea>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>📸 写真（任意）</label>
-                    <div class="photo-upload-mini">
-                        <div class="upload-area-mini" onclick="document.getElementById('cuttingInstabilityPhotoInput').click()">
-                            <div style="font-size: 2em;">📷</div>
-                            <p style="margin: 5px 0; font-size: 0.9em;">クリックして写真を追加</p>
-                        </div>
-                        <input type="file" id="cuttingInstabilityPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleCuttingInstabilityPhotoUpload(event)">
-                        <div class="photo-preview-mini" id="cuttingInstabilityPhotoPreview"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="cancel-button" onclick="closeModal('cuttingInstabilityModal')">キャンセル</button>
-                <button class="register-button instability" onclick="registerCuttingInstability()">登録</button>
             </div>
         </div>
     </div>

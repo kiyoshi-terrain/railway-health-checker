@@ -114,174 +114,34 @@ function updateChecklists() {
     }
     // 切土の場合
     else if (structureType === 'cutting') {
-        // 変状タブ
+        // 変状タブ（モーダル化）
         defectsContainer.innerHTML = `
-            <div class="checklist">
-                <h4>🔍 切土の変状項目</h4>
-                <div class="checklist-grid">
-                    <div class="check-item">
-                        <input type="checkbox" id="crack" name="defect">
-                        <label for="crack">き裂</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="settlement" name="defect">
-                        <label for="settlement">沈下・すべり</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="gully" name="defect">
-                        <label for="gully">ガリ・やせ・植生不活着</label>
-                    </div>
-                </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="register-button defect" onclick="openModal('cuttingDefectModal')">
+                    ➕ 変状を登録
+                </button>
             </div>
             
-            <div class="checklist" style="margin-top: 20px;">
-                <h4>🛡️ 切土防護設備の変状項目</h4>
-                <div class="checklist-grid">
-                    <div class="check-item">
-                        <input type="checkbox" id="slope-work-cave" name="defect-protection">
-                        <label for="slope-work-cave">のり面工の陥没・不陸</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="slope-work-float" name="defect-protection">
-                        <label for="slope-work-float">のり面工の浮き</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="slope-work-crack" name="defect-protection">
-                        <label for="slope-work-crack">のり面工のき裂</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="slope-work-gap" name="defect-protection">
-                        <label for="slope-work-gap">のり面工の食い違い</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="retaining-wall-settle" name="defect-protection">
-                        <label for="retaining-wall-settle">土留壁・石積壁の沈下</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="retaining-wall-tilt" name="defect-protection">
-                        <label for="retaining-wall-tilt">土留壁・石積壁の傾斜</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="retaining-wall-gap" name="defect-protection">
-                        <label for="retaining-wall-gap">土留壁・石積壁の食い違い</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="retaining-wall-crack" name="defect-protection">
-                        <label for="retaining-wall-crack">土留壁・石積壁のき裂・目地切れ</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="checklist" style="margin-top: 20px;">
-                <h4>💧 切土排水設備の変状項目</h4>
-                <div class="checklist-grid">
-                    <div class="check-item">
-                        <input type="checkbox" id="drainage-damage" name="defect-drainage">
-                        <label for="drainage-damage">排水設備の破損</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="drainage-gap" name="defect-drainage">
-                        <label for="drainage-gap">排水設備の食い違い</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="drainage-poor" name="defect-drainage">
-                        <label for="drainage-poor">排水設備の通水不良</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="drainage-sediment" name="defect-drainage">
-                        <label for="drainage-sediment">土砂・落葉の堆積</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="drainage-overflow" name="defect-drainage">
-                        <label for="drainage-overflow">溢水の跡</label>
-                    </div>
+            <div class="defect-list" id="cuttingDefectList">
+                <h4>📋 登録された変状</h4>
+                <div id="cuttingDefectItems">
+                    <p style="text-align: center; color: #999;">まだ変状が登録されていません</p>
                 </div>
             </div>
         `;
         
-        // 不安定性タブ
+        // 不安定性タブ（モーダル化）
         instabilityContainer.innerHTML = `
-            <div class="checklist">
-                <h4>🏗️ 立地条件・周辺環境</h4>
-                <div class="checklist-grid">
-                    <div class="check-item">
-                        <input type="checkbox" id="landslide" name="instability">
-                        <label for="landslide">地すべり地</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="alluvial-terrace" name="instability">
-                        <label for="alluvial-terrace">扇状地・段丘の末端部</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="disaster-history" name="instability">
-                        <label for="disaster-history">過去に多くの災害歴がある、あるいは崩壊跡地が存在</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="catchment" name="instability">
-                        <label for="catchment">背後に集水地形等が存在</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="env-deforestation" name="instability">
-                        <label for="env-deforestation">環境の変化（伐採）</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="env-development" name="instability">
-                        <label for="env-development">環境の変化（宅地等の開発）</label>
-                    </div>
-                </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="register-button instability" onclick="openModal('cuttingInstabilityModal')">
+                    ➕ 不安定性を登録
+                </button>
             </div>
             
-            <div class="checklist" style="margin-top: 20px;">
-                <h4>💧 切土・排水設備・付帯設備</h4>
-                <div class="checklist-grid">
-                    <div class="check-item">
-                        <input type="checkbox" id="slope-spring" name="instability">
-                        <label for="slope-spring">のり面からの湧水</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="permeable-layer" name="instability">
-                        <label for="permeable-layer">極端に透水性が異なる層の存在</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="uneven-surface" name="instability">
-                        <label for="uneven-surface">表層土の分布が不均一</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="rotten-roots" name="instability">
-                        <label for="rotten-roots">伐採木の腐った根の存在</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="overhang" name="instability">
-                        <label for="overhang">オーバーハング部の存在</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="unstable-rocks" name="instability">
-                        <label for="unstable-rocks">不安定な転石・浮石の存在</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="selective-erosion" name="instability">
-                        <label for="selective-erosion">選択侵食を受けている箇所</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="crack-development" name="instability">
-                        <label for="crack-development">割れ目の発達</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="unstable-shoulder" name="instability">
-                        <label for="unstable-shoulder">のり肩部の立木・構造物基礎が不安定</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="debris-accumulation" name="instability">
-                        <label for="debris-accumulation">のり尻や擁壁・柵背面に土砂や岩塊が堆積</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="pipe-soil-outflow" name="instability">
-                        <label for="pipe-soil-outflow">排水パイプから土砂が流出</label>
-                    </div>
-                    <div class="check-item">
-                        <input type="checkbox" id="drainage-capacity" name="instability">
-                        <label for="drainage-capacity">排水設備の容量不足</label>
-                    </div>
+            <div class="instability-list" id="cuttingInstabilityList">
+                <h4>📋 登録された不安定性</h4>
+                <div id="cuttingInstabilityItems">
+                    <p style="text-align: center; color: #999;">まだ不安定性が登録されていません</p>
                 </div>
             </div>
         `;
@@ -1427,6 +1287,291 @@ function loadHistoryFromStorage() {
             });
         }
     }
+}
+
+// 切土用のグローバル変数
+let registeredCuttingDefects = [];
+let registeredCuttingInstabilities = [];
+let tempCuttingDefectPhotos = [];
+let tempCuttingInstabilityPhotos = [];
+
+// 切土変状の登録
+function registerCuttingDefect() {
+    const type = document.getElementById('cuttingDefectType').value;
+    if (!type) {
+        alert('変状の種類を選択してください');
+        return;
+    }
+    
+    const km = document.getElementById('cuttingDefectKm').value;
+    const m = document.getElementById('cuttingDefectM').value;
+    
+    const defect = {
+        id: Date.now(),
+        type: type,
+        location: km && m ? `${km}k${m}m付近` : '',
+        detail: document.getElementById('cuttingDefectDetail').value,
+        photos: [...tempCuttingDefectPhotos]
+    };
+    
+    registeredCuttingDefects.push(defect);
+    updateCuttingDefectList();
+    addCuttingDefectToTable(defect);
+    closeModal('cuttingDefectModal');
+    
+    // フォームリセット
+    document.getElementById('cuttingDefectType').value = '';
+    document.getElementById('cuttingDefectKm').value = '';
+    document.getElementById('cuttingDefectM').value = '';
+    document.getElementById('cuttingDefectDetail').value = '';
+    tempCuttingDefectPhotos = [];
+    document.getElementById('cuttingDefectPhotoPreview').innerHTML = '';
+    
+    alert('切土の変状を登録しました！');
+}
+
+// 切土不安定性の登録
+function registerCuttingInstability() {
+    const type = document.getElementById('cuttingInstabilityType').value;
+    if (!type) {
+        alert('不安定要因の種類を選択してください');
+        return;
+    }
+    
+    const instability = {
+        id: Date.now(),
+        type: type,
+        location: document.getElementById('cuttingInstabilityLocation').value,
+        detail: document.getElementById('cuttingInstabilityDetail').value,
+        photos: [...tempCuttingInstabilityPhotos]
+    };
+    
+    registeredCuttingInstabilities.push(instability);
+    updateCuttingInstabilityList();
+    addCuttingInstabilityToTable(instability);
+    closeModal('cuttingInstabilityModal');
+    
+    // フォームリセット
+    document.getElementById('cuttingInstabilityType').value = '';
+    document.getElementById('cuttingInstabilityLocation').value = '';
+    document.getElementById('cuttingInstabilityDetail').value = '';
+    tempCuttingInstabilityPhotos = [];
+    document.getElementById('cuttingInstabilityPhotoPreview').innerHTML = '';
+    
+    alert('切土の不安定性を登録しました！');
+}
+
+// 切土変状リストの更新
+function updateCuttingDefectList() {
+    const defectItems = document.getElementById('cuttingDefectItems');
+    if (!defectItems) return;
+    
+    defectItems.innerHTML = registeredCuttingDefects.length === 0 
+        ? '<p style="text-align: center; color: #999;">まだ変状が登録されていません</p>'
+        : registeredCuttingDefects.map(d => `
+            <div class="defect-item">
+                <div>
+                    <div class="type">${d.type}</div>
+                    <div class="item-location">${d.location}</div>
+                    ${d.detail ? `<div style="color:#666;font-size:0.9em;margin-top:5px;">${d.detail}</div>` : ''}
+                    ${d.photos.length > 0 ? `<div style="color:#2196F3;font-size:0.9em;margin-top:5px;">📸 写真${d.photos.length}枚</div>` : ''}
+                </div>
+                <button class="remove-item" onclick="removeCuttingDefect(${d.id})">削除</button>
+            </div>
+        `).join('');
+}
+
+// 切土不安定性リストの更新
+function updateCuttingInstabilityList() {
+    const instabilityItems = document.getElementById('cuttingInstabilityItems');
+    if (!instabilityItems) return;
+    
+    instabilityItems.innerHTML = registeredCuttingInstabilities.length === 0 
+        ? '<p style="text-align: center; color: #999;">まだ不安定性が登録されていません</p>'
+        : registeredCuttingInstabilities.map(i => `
+            <div class="instability-item">
+                <div>
+                    <div class="type">${i.type}</div>
+                    <div class="item-location">${i.location}</div>
+                    ${i.detail ? `<div style="color:#666;font-size:0.9em;margin-top:5px;">${i.detail}</div>` : ''}
+                    ${i.photos.length > 0 ? `<div style="color:#FF9800;font-size:0.9em;margin-top:5px;">📸 写真${i.photos.length}枚</div>` : ''}
+                </div>
+                <button class="remove-item" onclick="removeCuttingInstability(${i.id})">削除</button>
+            </div>
+        `).join('');
+}
+
+// テーブルに追加
+function addCuttingDefectToTable(defect) {
+    const tableBody = document.getElementById('detailTableBody');
+    if (!tableBody) return;
+    
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td>${document.getElementById('managementNumber').value || '-'}</td>
+        <td>${defect.location || '-'}</td>
+        <td>${defect.type}</td>
+        <td>${defect.detail || '-'}</td>
+        <td style="text-align:center;">${defect.photos.length > 0 ? '📸' : '-'}</td>
+        <td style="text-align:center;">-</td>
+        <td><select onchange="updateAutoJudgment(this)">
+            <option value="">-</option><option value="無">無</option>
+            <option value="有">有</option><option value="新規">新規</option>
+        </select></td>
+        <td><select onchange="updateAutoJudgment(this)">
+            <option value="">-</option><option value="無">無</option>
+            <option value="小">小</option><option value="中">中</option><option value="大">大</option>
+        </select></td>
+        <td><input type="text" maxlength="2" style="text-align:center;"></td>
+        <td><input type="text" maxlength="2" style="text-align:center;"></td>
+        <td class="grade-2024"><input type="text" maxlength="2" style="text-align:center;">
+            <span class="auto-grade" style="color:#666;font-size:0.8em;"></span></td>
+    `;
+    
+    const defectCategory = tableBody.querySelector('.defect-category');
+    defectCategory.parentNode.insertBefore(newRow, defectCategory.nextSibling);
+}
+
+function addCuttingInstabilityToTable(instability) {
+    const tableBody = document.getElementById('detailTableBody');
+    if (!tableBody) return;
+    
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td>${document.getElementById('managementNumber').value || '-'}</td>
+        <td>${instability.location || '-'}</td>
+        <td>${instability.type}</td>
+        <td>${instability.detail || '-'}</td>
+        <td style="text-align:center;">${instability.photos.length > 0 ? '📸' : '-'}</td>
+        <td style="text-align:center;">-</td>
+        <td><select onchange="updateAutoJudgment(this)">
+            <option value="">-</option><option value="無">無</option>
+            <option value="有">有</option><option value="新規">新規</option>
+        </select></td>
+        <td><select onchange="updateAutoJudgment(this)">
+            <option value="">-</option><option value="無">無</option>
+            <option value="小">小</option><option value="中">中</option><option value="大">大</option>
+        </select></td>
+        <td><input type="text" maxlength="2" style="text-align:center;"></td>
+        <td><input type="text" maxlength="2" style="text-align:center;"></td>
+        <td class="grade-2024"><input type="text" maxlength="2" style="text-align:center;">
+            <span class="auto-grade" style="color:#666;font-size:0.8em;"></span></td>
+    `;
+    
+    const instabilityCategory = tableBody.querySelector('.instability-category');
+    instabilityCategory.parentNode.insertBefore(newRow, instabilityCategory.nextSibling);
+}
+
+// 削除関数
+function removeCuttingDefect(defectId) {
+    if (confirm('この変状を削除しますか？')) {
+        registeredCuttingDefects = registeredCuttingDefects.filter(d => d.id !== defectId);
+        updateCuttingDefectList();
+    }
+}
+
+function removeCuttingInstability(instabilityId) {
+    if (confirm('この不安定性を削除しますか？')) {
+        registeredCuttingInstabilities = registeredCuttingInstabilities.filter(i => i.id !== instabilityId);
+        updateCuttingInstabilityList();
+    }
+}
+
+// 写真アップロード処理
+function handleCuttingDefectPhotoUpload(event) {
+    const files = event.target.files;
+    const preview = document.getElementById('cuttingDefectPhotoPreview');
+    
+    for (let file of files) {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoId = Date.now() + Math.random();
+                tempCuttingDefectPhotos.push({
+                    id: photoId,
+                    data: e.target.result,
+                    name: file.name
+                });
+                
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item-mini';
+                photoItem.innerHTML = `
+                    <img src="${e.target.result}" alt="${file.name}">
+                    <button class="remove-mini" onclick="removeTempCuttingDefectPhoto(${photoId})">×</button>
+                `;
+                preview.appendChild(photoItem);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+}
+
+function handleCuttingInstabilityPhotoUpload(event) {
+    const files = event.target.files;
+    const preview = document.getElementById('cuttingInstabilityPhotoPreview');
+    
+    for (let file of files) {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoId = Date.now() + Math.random();
+                tempCuttingInstabilityPhotos.push({
+                    id: photoId,
+                    data: e.target.result,
+                    name: file.name
+                });
+                
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item-mini';
+                photoItem.innerHTML = `
+                    <img src="${e.target.result}" alt="${file.name}">
+                    <button class="remove-mini" onclick="removeTempCuttingInstabilityPhoto(${photoId})">×</button>
+                `;
+                preview.appendChild(photoItem);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+}
+
+// 写真削除
+function removeTempCuttingDefectPhoto(photoId) {
+    tempCuttingDefectPhotos = tempCuttingDefectPhotos.filter(p => p.id !== photoId);
+    updateCuttingDefectPhotoPreview();
+}
+
+function removeTempCuttingInstabilityPhoto(photoId) {
+    tempCuttingInstabilityPhotos = tempCuttingInstabilityPhotos.filter(p => p.id !== photoId);
+    updateCuttingInstabilityPhotoPreview();
+}
+
+// 写真プレビュー更新
+function updateCuttingDefectPhotoPreview() {
+    const preview = document.getElementById('cuttingDefectPhotoPreview');
+    preview.innerHTML = '';
+    tempCuttingDefectPhotos.forEach(photo => {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item-mini';
+        photoItem.innerHTML = `
+            <img src="${photo.data}" alt="${photo.name}">
+            <button class="remove-mini" onclick="removeTempCuttingDefectPhoto(${photo.id})">×</button>
+        `;
+        preview.appendChild(photoItem);
+    });
+}
+
+function updateCuttingInstabilityPhotoPreview() {
+    const preview = document.getElementById('cuttingInstabilityPhotoPreview');
+    preview.innerHTML = '';
+    tempCuttingInstabilityPhotos.forEach(photo => {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item-mini';
+        photoItem.innerHTML = `
+            <img src="${photo.data}" alt="${photo.name}">
+            <button class="remove-mini" onclick="removeTempCuttingInstabilityPhoto(${photo.id})">×</button>
+        `;
+        preview.appendChild(photoItem);
+    });
 }
 
 // ページ読み込み時に履歴を復元
