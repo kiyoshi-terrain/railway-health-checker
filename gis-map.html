@@ -1344,7 +1344,7 @@
         });
         
         // 基本的な地図初期化
-        const map = new ol.Map({
+        window.map = new ol.Map({
             target: 'map',
             layers: [
                 new ol.layer.Tile({
@@ -1396,6 +1396,10 @@
         // 新規登録機能を初期化
         RegistrationManager.init(map);
     </script>
-        
+
+    <!-- ★★★ ここに追加！ ★★★ -->
+    <script src="railway-progress-bar.js"></script>
+    <script src="railway-settings.js"></script>
+                
 </body>
 </html>

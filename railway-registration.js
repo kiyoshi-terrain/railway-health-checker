@@ -305,18 +305,41 @@ const RegistrationManager = {
     
     // 保存処理
     async save() {
-        console.log('保存データ:', this.formData);
-        
-        // TODO: IndexedDBに保存
-        // TODO: サーバーに送信
-        
-        alert('登録が完了しました！');
-        
-        // 登録完了後の処理
-        this.close();
-        
-        // 最近の登録を更新
-        // TODO: 実装
+        try {
+            // 保存用データを作成
+            const saveData = {
+                id: await this.generateId(this.formData.classification),
+                type: this.formData.classification,
+                coords: this.formData.coords,
+                structureType: this.formData.structureType,
+                kilometer: this.formData.kilometer,
+                grade: this.formData.grade,
+                remarks: this.formData.remarks,
+                photos: this.formData.photos,
+                timestamp: new Date().toISOString(),
+                history: [{
+                    year: new Date().getFullYear(),
+                    health: this.formData.grade || null
+                }]
+            };
+            
+            console.log('保存データ:', saveData);
+            
+            // IndexedDBに保存
+            await this.saveToDatabase(saveData);
+            
+            // 地図にマーカー追加
+            this.addMarkerToMap(saveData);
+            
+            alert(`登録完了！\nID: ${saveData.id}`);
+            
+            // 登録完了後の処理
+            this.close();
+            
+        } catch (error) {
+            console.error('保存エラー:', error);
+            alert('保存に失敗しました');
+        }
     },
     
     // フォームリセット
@@ -366,3 +389,109 @@ function previousStep() {
 
 // エクスポート
 window.RegistrationManager = RegistrationManager;
+
+// ==================== IndexedDB関連の機能 ====================
+
+// IndexedDBの初期化
+RegistrationManager.initDatabase = function() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('RailwayHealthDB', 1);
+        
+        request.onerror = () => {
+            console.error('DB初期化エラー:', request.error);
+            reject(request.error);
+        };
+        
+        request.onsuccess = () => {
+            console.log('DB接続成功！');
+            resolve(request.result);
+        };
+        
+        request.onupgradeneeded = (event) => {
+            console.log('DB作成・アップグレード中...');
+            const db = event.target.result;
+            
+            if (!db.objectStoreNames.contains('registrations')) {
+                const store = db.createObjectStore('registrations', { keyPath: 'id' });
+                store.createIndex('type', 'type', { unique: false });
+                store.createIndex('timestamp', 'timestamp', { unique: false });
+                console.log('registrationsストア作成完了！');
+            }
+        };
+    });
+};
+
+// ID自動採番
+RegistrationManager.generateId = async function(type) {
+    try {
+        const db = await this.initDatabase();
+        const transaction = db.transaction(['registrations'], 'readonly');
+        const store = transaction.objectStore('registrations');
+        const index = store.index('type');
+        
+        return new Promise((resolve) => {
+            const request = index.getAllKeys(IDBKeyRange.only(type));
+            request.onsuccess = () => {
+                const keys = request.result;
+                const numbers = keys.map(id => parseInt(id.substring(1)));
+                const nextNumber = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
+                const newId = `${type}${String(nextNumber).padStart(2, '0')}`;
+                console.log(`新しいID: ${newId}`);
+                resolve(newId);
+            };
+        });
+    } catch (error) {
+        console.error('ID生成エラー:', error);
+        return `${type}01`; // エラー時はデフォルト
+    }
+};
+
+// データベースに保存
+RegistrationManager.saveToDatabase = async function(data) {
+    try {
+        const db = await this.initDatabase();
+        const transaction = db.transaction(['registrations'], 'readwrite');
+        const store = transaction.objectStore('registrations');
+        
+        const request = store.add(data);
+        
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => {
+                console.log('保存成功！ID:', data.id);
+                resolve(data.id);
+            };
+            
+            request.onerror = () => {
+                console.error('保存エラー:', request.error);
+                reject(request.error);
+            };
+        });
+    } catch (error) {
+        console.error('DB保存エラー:', error);
+        throw error;
+    }
+};
+
+// 地図にマーカーを追加（進行バー付き）
+RegistrationManager.addMarkerToMap = function(data) {
+    const progressBar = new HealthProgressBar();
+    const feature = new ol.Feature({
+        geometry: new ol.geom.Point(data.coords.webMercator),
+        ...data
+    });
+    
+    // 進行バー付きスタイルを適用
+    feature.setStyle(progressBar.createMarkerStyle(data));
+    
+    // 専用レイヤーに追加
+    if (!window.registeredPointsLayer) {
+        window.registeredPointsLayer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            zIndex: 200
+        });
+        this.map.addLayer(window.registeredPointsLayer);
+    }
+    
+    window.registeredPointsLayer.getSource().addFeature(feature);
+    console.log('マーカー追加完了！', data.id);
+};
