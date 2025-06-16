@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Health Checker - GIS Map</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@7.5.2/ol.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            overflow: hidden;
+        }
+        
+        /* メインコンテナ */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            background: #fff;
+        }
+        
+        /* サイドバー */
+        .sidebar {
+            width: 380px;
+            background: #ffffff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        
+        /* ヘッダー */
+        .sidebar-header {
+            background: linear-gradient(135deg, #2a5298 0%, #1e88e5 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .header-info h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .header-info p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        /* タブナビゲーション */
+        .tab-nav {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: #2a5298;
+            background: white;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2a5298;
+        }
+        
+        /* コンテンツエリア */
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        /* 検索バー */
+        .search-container {
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        /* クイックアクション */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .action-btn {
+            padding: 15px;
+            background: #f0f4f8;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            background: #e1e8f0;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.primary {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            background: #1e3d6f;
+        }
+        
+        .action-icon {
+            font-size: 24px;
+        }
+        
+        .action-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* データカード */
+        .data-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .data-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .data-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .data-card-badge {
+            padding: 4px 12px;
+            background: #e3f2fd;
+            color: #2a5298;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* ステータスインジケーター */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .status-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .status-icon.defect { background: #ffebee; color: #dc3545; }
+        .status-icon.instability { background: #fff3e0; color: #fd7e14; }
+        .status-icon.point { background: #e3f2fd; color: #0d6efd; }
+        .status-icon.observation { background: #f5f5f5; color: #6c757d; }
+        
+        .status-info h4 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .status-info p {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* マップコンテナ */
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #e5e5e5;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* フローティングコントロール */
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* レイヤーコントロール */
+        .layer-control {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 280px;
+        }
+        
+        .layer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .layer-item:last-child {
+            border-bottom: none;
+        }
+        
+        .layer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .layer-icon {
+            width: 36px;
+            height: 36px;
+            background: #f0f4f8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* トグルスイッチ */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #2a5298;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        
+        /* 情報パネル */
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 320px;
+            transform: translateY(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .info-panel.active {
+            transform: translateY(0);
+        }
+        
+        /* GeoTIFFアップロード */
+        .upload-area {
+            border: 2px dashed #2a5298;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: #f0f4f8;
+        }
+        
+        .upload-area.dragover {
+            background: #e3f2fd;
+            border-color: #1e88e5;
+        }
+        
+        /* 距離・面積計測結果 */
+        .measurement-result {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: #2a5298;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(42,82,152,0.3);
+            display: none;
+        }
+        
+        .measurement-result.active {
+            display: block;
+        }
+            /* OpenLayersスタイルのコントロール */
+        .ol-style-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ol-style-control-group {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ol-style-button {
+            width: 30px;
+            height: 30px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #333;
+            transition: all 0.25s;
+        }
+
+        .ol-style-button:hover {
+            background: #f4f4f4;
+        }
+
+        .ol-style-button:first-child {
+            border-radius: 4px 4px 0 0;
+        }
+
+        .ol-style-button:last-child {
+            border-radius: 0 0 4px 4px;
+            border-top: 1px solid #ddd;
+        }
+
+                /* ステータスバー */
+        .status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: white;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+        }
+
+        /* ステータスセクション */
+        .status-section {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            height: 100%;
+        }
+
+        /* 座標表示エリア */
+        .status-coords {
+            flex: 1;
+            background: #2a5298;
+            color: white;
+        }
+
+        /* コントロールエリア */
+        .status-control {
+            background: #2d3748;
+            color: white;
+            gap: 8px;
+        }
+
+        /* ラベル */
+        .status-label {
+            font-size: 13px;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        /* 数値入力 */
+        .status-input {
+            width: 60px;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .status-input:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .status-input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.2);
+            border-color: #4a90e2;
+        }
+
+        /* 単位 */
+        .status-unit {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-left: 4px;
+        }
+
+        /* ボタングループ */
+        .status-buttons {
+            display: flex;
+            flex-direction: column;
+            margin-left: 8px;
+        }
+
+        /* 調整ボタン */
+        .status-btn {
+            width: 24px;
+            height: 22px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .status-btn:first-child {
+            border-radius: 4px 4px 0 0;
+            border-bottom: none;
+        }
+
+        .status-btn:last-child {
+            border-radius: 0 0 4px 4px;
+        }
+
+        .status-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .status-btn:active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* 座標表示 */
+        #coordsDisplay {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+        }
+                
+        /* リセットボタン */
+        .status-reset-btn {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin-left: 8px;
+            border-radius: 6px;
+        }
+
+        .status-reset-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1);
+        }
+        /* 新規登録パネル */
+        .registration-panel {
+            background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            background: linear-gradient(135deg, #2a5298 0%, #1e88e5 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .close-btn:hover {
+            opacity: 1;
+        }
+        
+        /* ステップインジケーター */
+        .step-indicator {
+            display: flex;
+            padding: 20px;
+            gap: 10px;
+            background: #f8f9fa;
+            position: relative;
+        }
+        
+        .step {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .step.active {
+            color: #2a5298;
+            font-weight: 600;
+        }
+        
+        .step.active::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2a5298;
+        }
+        
+        /* ステップコンテンツ */
+        .step-content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        .instruction-box {
+            background: #e3f2fd;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #2a5298;
+        }
+        
+        .coords-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .coords-preview label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .coords-preview input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background: white;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+        }
+        
+        /* フォーム要素 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .form-select,
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-select:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        /* 分類ボタン */
+        .classification-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .class-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .class-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .class-btn.selected {
+            border-color: #2a5298;
+            background: #f0f7ff;
+        }
+        
+        .class-btn .icon {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .class-btn.defect { color: #dc3545; }
+        .class-btn.defect.selected { border-color: #dc3545; background: #fff5f5; }
+        
+        .class-btn.instability { color: #fd7e14; }
+        .class-btn.instability.selected { border-color: #fd7e14; background: #fff9f0; }
+        
+        .class-btn.point { color: #0d6efd; }
+        .class-btn.point.selected { border-color: #0d6efd; background: #f0f7ff; }
+        
+        .class-btn.observation { color: #6c757d; }
+        .class-btn.observation.selected { border-color: #6c757d; background: #f8f9fa; }
+        
+        /* 健全度セレクター */
+        .grade-selector {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .grade-btn {
+            width: 48px;
+            height: 48px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .grade-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .grade-btn.selected {
+            background: #2a5298;
+            color: white;
+            border-color: #2a5298;
+        }
+        
+        /* 写真アップロード */
+        .photo-upload-area {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .upload-btn {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .upload-btn:hover {
+            background: #1e3d6f;
+        }
+        
+        .photo-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .photo-thumb {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 入力グループ */
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-with-unit input {
+            flex: 1;
+        }
+        
+        .unit {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* パネルフッター */
+        .panel-footer {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .btn-primary,
+        .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1e3d6f;
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }        
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- サイドバー -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🚂</div>
+                <div class="header-info">
+                    <h1>Railway Health Checker</h1>
+                    <p>土構造物健全度評価システム</p>
+                </div>
+            </div>
+            
+            <div class="tab-nav">
+                <div class="tab active" onclick="switchTab('inspection')">点検</div>
+                <div class="tab" onclick="switchTab('layers')">レイヤー</div>
+                <div class="tab" onclick="switchTab('analysis')">分析</div>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- 検索 -->
+                <div class="search-container">
+                    <input type="text" class="search-box" placeholder="キロ程・地点名を検索...">
+                </div>
+                
+                <!-- クイックアクション -->
+                <div class="quick-actions">
+                    <button class="action-btn primary" onclick="startNewInspection()">
+                        <span class="action-icon">📍</span>
+                        <span class="action-label">新規登録</span>
+                    </button>
+                    <button class="action-btn" onclick="toggleMeasurement()">
+                        <span class="action-icon">📏</span>
+                        <span class="action-label">計測</span>
+                    </button>
+                    <button class="action-btn" onclick="captureScreen()">
+                        <span class="action-icon">📸</span>
+                        <span class="action-label">画面保存</span>
+                    </button>
+                </div>
+                
+                <!-- GeoTIFFアップロード -->
+                <div class="upload-area" id="uploadArea">
+                    <p style="font-size: 24px; margin-bottom: 10px;">📂</p>
+                    <p style="font-weight: 600; margin-bottom: 5px;">GeoTIFFをアップロード</p>
+                    <p style="font-size: 12px; color: #666;">ドラッグ&ドロップまたはクリック</p>
+                    <input type="file" id="fileInput" accept=".tif,.tiff" style="display: none;">
+                </div>
+                                <!-- 保存済みレイヤー管理 -->
+                <div class="data-card" style="margin-top: 15px;">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">保存済みレイヤー</h3>
+                        <button onclick="GeoTIFFManager.saveCurrentLayer()" 
+                                style="padding: 6px 12px; background: #2a5298; color: white; 
+                                       border: none; border-radius: 12px; cursor: pointer; font-size: 12px;">
+                            💾 保存
+                        </button>
+                    </div>
+                    <div id="savedLayersList" style="max-height: 300px; overflow-y: auto;">
+                        <p style="text-align: center; color: #999; padding: 20px;">
+                            保存済みレイヤーはありません
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ステータスサマリー -->
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">登録状況サマリー</h3>
+                        <span class="data-card-badge">今日: 5件</span>
+                    </div>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-icon defect">D</div>
+                            <div class="status-info">
+                                <h4>12</h4>
+                                <p>変状</p>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon instability">I</div>
+                            <div class="status-info">
+                                <h4>8</h4>
+                                <p>不安定性</p>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon point">P</div>
+                            <div class="status-info">
+                                <h4>15</h4>
+                                <p>着眼点</p>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon observation">O</div>
+                            <div class="status-info">
+                                <h4>23</h4>
+                                <p>観察記録</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 最近の登録 -->
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">最近の登録</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: white; border-radius: 8px;">
+                            <span style="color: #dc3545; font-weight: 600;">D12</span>
+                            <div style="flex: 1;">
+                                <p style="font-size: 14px; font-weight: 500;">盛土のり面崩壊</p>
+                                <p style="font-size: 12px; color: #666;">12k500m付近</p>
+                            </div>
+                            <span style="font-size: 12px; color: #999;">10分前</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 新規登録パネル -->
+                <div class="registration-panel" id="registrationPanel" style="display: none;">
+                    <div class="panel-header">
+                        <h3>📍 新規地点登録</h3>
+                        <button class="close-btn" onclick="closeRegistration()">✕</button>
+                    </div>
+                    
+                    <div class="step-indicator">
+                        <div class="step active" data-step="1">1. 地点選択</div>
+                        <div class="step" data-step="2">2. 基本情報</div>
+                        <div class="step" data-step="3">3. 詳細・写真</div>
+                    </div>
+                    
+                    <!-- ステップ1: 地点選択 -->
+                    <div class="step-content active" id="step1">
+                        <div class="instruction-box">
+                            <p>🎯 地図上をクリックして登録地点を選択してください</p>
+                        </div>
+                        <div class="coords-preview">
+                            <label>選択座標</label>
+                            <input type="text" id="selectedCoords" readonly placeholder="地図をクリック...">
+                        </div>
+                    </div>
+                    
+                    <!-- ステップ2: 基本情報 -->
+                    <div class="step-content" id="step2" style="display: none;">
+                        <div class="form-group">
+                            <label>分類 *</label>
+                            <div class="classification-grid">
+                                <button class="class-btn defect" data-type="D">
+                                    <span class="icon">D</span>
+                                    <span>変状</span>
+                                </button>
+                                <button class="class-btn instability" data-type="I">
+                                    <span class="icon">I</span>
+                                    <span>不安定性</span>
+                                </button>
+                                <button class="class-btn point" data-type="P">
+                                    <span class="icon">P</span>
+                                    <span>着眼点</span>
+                                </button>
+                                <button class="class-btn observation" data-type="O">
+                                    <span class="icon">O</span>
+                                    <span>観察記録</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>構造物種別 *</label>
+                            <select id="structureType" class="form-select">
+                                <option value="">選択してください</option>
+                                <option value="embankment">盛土</option>
+                                <option value="cutting">切土</option>
+                                <option value="natural">自然斜面</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>キロ程</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="kilometer" class="form-input" placeholder="12.500" step="0.001">
+                                <span class="unit">km</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ステップ3: 詳細・写真 -->
+                    <div class="step-content" id="step3" style="display: none;">
+                        <div class="form-group">
+                            <label>健全度評価</label>
+                            <div class="grade-selector">
+                                <button class="grade-btn" data-grade="S">S</button>
+                                <button class="grade-btn" data-grade="C">C</button>
+                                <button class="grade-btn" data-grade="B">B</button>
+                                <button class="grade-btn" data-grade="A">A</button>
+                                <button class="grade-btn" data-grade="AA">AA</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>現場写真</label>
+                            <div class="photo-upload-area">
+                                <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
+                                <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
+                                    📷 写真を追加
+                                </button>
+                                <div class="photo-preview" id="photoPreview"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>備考・詳細</label>
+                            <textarea id="remarks" class="form-textarea" rows="4" 
+                                      placeholder="状況の詳細、対策の必要性など..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-footer">
+                        <button class="btn-secondary" onclick="previousStep()" id="prevBtn" style="display: none;">戻る</button>
+                        <button class="btn-secondary" onclick="closeRegistration()">キャンセル</button>
+                        <button class="btn-primary" onclick="nextStep()" id="nextBtn">次へ</button>
+                    </div>
+                </div>                
+            </div>
+        </div>
+        
+        <!-- マップエリア -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+                        <!-- OpenLayersスタイルコントロール -->
+            <div class="ol-style-controls">
+                <!-- ズームコントロール -->
+                <div class="ol-style-control-group">
+                    <button class="ol-style-button" onclick="zoomIn()" title="ズームイン">
+                        <span>+</span>
+                    </button>
+                    <button class="ol-style-button" onclick="zoomOut()" title="ズームアウト">
+                        <span>−</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 既存のコントロール（位置調整） -->
+            <div class="map-controls" style="top: 80px; right: 20px;">
+                <button class="control-btn" onclick="getCurrentLocation()">📍</button>
+                <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
+                <button class="control-btn" onclick="toggleMeasurement()">📏</button>
+                <button class="control-btn" onclick="captureScreen()">📸</button>
+            </div>
+            
+            <!-- 計測結果表示 -->
+            <div class="measurement-result" id="measurementResult">
+                <span id="measurementText">距離: 0m</span>
+            </div>
+            
+            <!-- レイヤーコントロール -->
+            <div class="layer-control">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">レイヤー管理</h3>
+                <div class="layer-item">
+                    <div class="layer-info">
+                        <div class="layer-icon">🗾</div>
+                        <div>
+                            <p style="font-weight: 500;">国土地理院</p>
+                            <p style="font-size: 12px; color: #666;">標準地図</p>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="layer-item">
+                    <div class="layer-info">
+                        <div class="layer-icon">📐</div>
+                        <div>
+                            <p style="font-weight: 500;">平面図</p>
+                            <p style="font-size: 12px; color: #666;">GeoTIFF</p>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="tiffToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="layer-item">
+                    <div class="layer-info">
+                        <div class="layer-icon">📍</div>
+                        <div>
+                            <p style="font-weight: 500;">登録地点</p>
+                            <p style="font-size: 12px; color: #666;">D/I/P/O</p>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div style="margin-top: 15px;">
+                    <label style="font-size: 12px; color: #666;">透明度</label>
+                    <input type="range" min="0" max="100" value="70" style="width: 100%; margin-top: 5px;">
+                </div>
+            </div>
+            
+            <!-- 情報パネル -->
+            <div class="info-panel" id="infoPanel">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">地点情報</h3>
+                <div id="pointInfo">
+                    <!-- 動的に生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- ステータスバー -->
+        <div class="status-bar">
+            <!-- 座標表示エリア（左側） -->
+            <div class="status-section status-coords">
+                <span class="status-label">座標:</span>
+                <span id="coordsDisplay">N35.7000° E139.7000°</span>
+            </div>
+            
+            <!-- ズームコントロール（中央） -->
+            <div class="status-section status-control">
+                <span class="status-label">倍率:</span>
+                <input type="number" id="zoomInput" class="status-input" value="100" min="10" max="2000" step="10">
+                <span class="status-unit">%</span>
+                <div class="status-buttons">
+                    <button class="status-btn" onclick="adjustZoom(10)">▲</button>
+                    <button class="status-btn" onclick="adjustZoom(-10)">▼</button>
+                </div>
+            </div>
+            
+            <!-- 回転コントロール（右側） -->
+            <div class="status-section status-control">
+                <span class="status-label">回転:</span>
+                <input type="number" id="rotationInput" class="status-input" value="0" min="-180" max="180" step="5">
+                <span class="status-unit">°</span>
+                <div class="status-buttons">
+                    <button class="status-btn" onclick="adjustRotation(5)">▲</button>
+                    <button class="status-btn" onclick="adjustRotation(-5)">▼</button>
+                </div>
+                <!-- リセットボタン追加 -->
+                <button class="status-reset-btn" onclick="resetRotation()" title="北を上にリセット">🧭</button>                
+            </div>
+        </div>
+        
+    </div>  <!-- map-containerの終了タグ -->
+</div>      <!-- app-containerの終了タグ -->
+                
+
+        </div>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/ol@7.5.2/dist/ol.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/geotiff@2.0.7/dist-browser/geotiff.js"></script>
+    <script>
+        // ダミー関数（実装例）
+        function switchTab(tab) {
+            console.log('Switching to tab:', tab);
+        }
+        
+        function startNewInspection() {
+            console.log('Starting new inspection');
+        }
+        
+        function toggleMeasurement() {
+            console.log('Toggle measurement mode');
+        }
+        
+        function captureScreen() {
+            console.log('Capturing screen');
+        }
+        
+        // ファイルアップロード
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                console.log('File dropped:', files[0].name);
+            }
+        });
+        
+        // 基本的な地図初期化
+        const map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
+                        attributions: '© 国土地理院'
+                    })
+                })
+            ],
+            view: new ol.View({
+                center: ol.proj.fromLonLat([139.7, 35.7]),
+                zoom: 12
+            })
+        });
+    </script>
+    });
+    </script>
+
+    <!-- proj4js追加 -->
+    <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.0/dist/proj4.js"></script>
+    <script>
+        // EPSG:6677 (JGD2011 / Japan Plane Rectangular CS IX) の定義
+        proj4.defs("EPSG:6677", "+proj=tmerc +lat_0=36 +lon_0=139.8333333333333 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+        
+        // OpenLayersに登録
+        ol.proj.proj4.register(proj4);
+    </script>
+
+    <!-- GeoTIFFマネージャー追加 -->
+    <script src="railway-geotiff.js"></script>
+    <script>
+        // GeoTIFFマネージャーを初期化
+        GeoTIFFManager.init(map);
+    </script>
+        
+    <!-- 地図コントロール追加 -->
+    <script src="railway-map-controls.js"></script>
+    <script>
+        // 地図コントロールを初期化
+        MapControls.init(map);
+    </script>
+        
+    <!-- レイヤー保存機能追加 -->
+    <script src="railway-layer-storage.js"></script>
+    
+    <!-- 新規登録機能追加 -->
+    <script src="railway-registration.js"></script>
+    <script>
+        // 新規登録機能を初期化
+        RegistrationManager.init(map);
+    </script>
+        
+</body>
+</html>
