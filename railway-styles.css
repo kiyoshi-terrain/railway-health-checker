@@ -1275,3 +1275,77 @@ input[type="color"] {
 .btn-secondary:hover {
     background: #d0d0d0;
 }
+
+/* ==================== 登録済み地点リスト ==================== */
+.registration-item {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.registration-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.reg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.reg-id {
+    font-weight: bold;
+    font-size: 14px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: white;
+}
+
+.reg-id.d-type { background: #dc3545; }
+.reg-id.i-type { background: #fd7e14; }
+.reg-id.p-type { background: #0d6efd; }
+.reg-id.o-type { background: #6c757d; }
+
+.reg-grade {
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.grade-S { background: #28a745; color: white; }
+.grade-C { background: #17a2b8; color: white; }
+.grade-B { background: #ffc107; color: #333; }
+.grade-A { background: #fd7e14; color: white; }
+.grade-AA { background: #dc3545; color: white; }
+.grade-none { background: #e9ecef; color: #666; }
+
+.reg-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.reg-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.reg-actions button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.reg-actions button:hover {
+    opacity: 1;
+}
