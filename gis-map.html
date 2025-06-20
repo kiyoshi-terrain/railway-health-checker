@@ -11,10 +11,34 @@
             padding: 0;
             box-sizing: border-box;
         }
+
+        /* ⭐ JRSEカラーパレット定義 */
+        :root {
+            /* JRSEコーポレートカラー */
+            --jrse-primary: #006838;
+            --jrse-primary-dark: #004d40;
+            --jrse-primary-light: #4caf50;
+            --jrse-accent: #81c784;
+            
+            /* ダークモード基調色 */
+            --bg-dark: #0a0f0d;
+            --bg-card: #1a1f1e;
+            --bg-card-hover: #232928;
+            --text-primary: #f0f0f0;      /* ⭐ もっと白に近く */
+            --text-secondary: #b8b8b8;    /* ⭐ 薄いグレー */
+            --text-muted: #999999;         /* ⭐ さらに薄く */
+            
+            /* ステータスカラー */
+            --status-safe: #4caf50;
+            --status-warning: #ff9800;
+            --status-danger: #f44336;
+            --status-critical: #d32f2f;
+        }        
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
             overflow: hidden;
         }
         
@@ -28,8 +52,9 @@
         /* サイドバー */
         .sidebar {
             width: 380px;
-            background: #ffffff;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            background: var(--bg-card);
+            border-right: 1px solid rgba(76, 175, 80, 0.2);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             z-index: 1000;
@@ -37,12 +62,13 @@
         
         /* ヘッダー */
         .sidebar-header {
-            background: linear-gradient(135deg, #2a5298 0%, #1e88e5 100%);
+            background: linear-gradient(135deg, var(--jrse-primary-dark) 0%, var(--jrse-primary) 100%);
             color: white;
             padding: 20px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
         .logo {
@@ -87,18 +113,12 @@
         }
         
         .tab.active {
-            color: #2a5298;
-            background: white;
+            color: var(--jrse-primary);
+            background: var(--bg-card);
         }
         
         .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #2a5298;
+            background: var(--jrse-primary);
         }
         
         /* コンテンツエリア */
@@ -114,17 +134,14 @@
         }
         
         .search-box {
-            width: 100%;
-            padding: 12px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 14px;
-            transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            color: var(--text-primary);
         }
         
         .search-box:focus {
-            outline: none;
-            border-color: #2a5298;
+            border-color: var(--jrse-primary);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
         }
         
         /* クイックアクション */
@@ -154,12 +171,15 @@
         }
         
         .action-btn.primary {
-            background: #2a5298;
+            background: linear-gradient(135deg, var(--jrse-primary) 0%, var(--jrse-primary-dark) 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
         }
         
         .action-btn.primary:hover {
-            background: #1e3d6f;
+            background: linear-gradient(135deg, var(--jrse-primary-light) 0%, var(--jrse-primary) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
         }
         
         .action-icon {
@@ -173,17 +193,20 @@
         
         /* データカード */
         .data-card {
-            background: #f8f9fa;
+            background: rgba(30, 30, 45, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(76, 175, 80, 0.3);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
         
-        .data-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .data-card:hover {
+            border-color: rgba(76, 175, 80, 0.6);
+            box-shadow: 0 6px 30px rgba(76, 175, 80, 0.2);
+            transform: translateY(-2px);
         }
         
         .data-card-title {
@@ -942,25 +965,969 @@
         
         .btn-secondary:hover {
             background: #d0d0d0;
-        }        
-    </style>
+        }
+        
+/* 写真アップロード拡張スタイル */
+        .upload-options {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .upload-btn {
+            flex: 1;
+            min-width: 120px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: #1e3d6f;
+            transform: translateY(-1px);
+        }
+
+        .drop-zone {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        .drop-zone:hover {
+            background: #f0f4f8;
+            border-color: #2a5298;
+        }
+
+        .drop-zone.dragover {
+            background: #e3f2fd;
+            border-color: #2a5298;
+            transform: scale(1.02);
+        }
+
+        .drop-zone p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .photo-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .photo-thumb {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-thumb .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .photo-thumb:hover .remove-btn {
+            opacity: 1;
+        }
+/* 汎用モーダルスタイル */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-dialog {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-size: 20px;
+            color: #2a5298;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        /* アニメーション */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* モーダル内のフォーム */
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .type-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .type-btn.selected {
+            background: #f0f7ff;
+            transform: scale(1.05);
+        }
+        
+        .type-btn.d-type { border-color: #dc3545; color: #dc3545; }
+        .type-btn.i-type { border-color: #fd7e14; color: #fd7e14; }
+        .type-btn.p-type { border-color: #0d6efd; color: #0d6efd; }
+        .type-btn.o-type { border-color: #6c757d; color: #6c757d; }
+        
+        .type-btn .icon {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .type-btn .name {
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+        
+        .edit-section {
+            margin-bottom: 20px;
+        }
+        
+        .edit-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .photo-editor {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .photo-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .remove-photo {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .add-photo-btn {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #2a5298;
+            border-radius: 8px;
+            background: #f0f7ff;
+            color: #2a5298;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            transition: all 0.3s;
+        }
+        
+        .add-photo-btn:hover {
+            background: #e3f2fd;
+            transform: scale(1.05);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }                        
+        /* ⭐ みくの可愛いアニメーション！ */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .logo svg {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        /* ボタンのキラキラ */
+        .action-btn.primary::after {
+            content: '✨';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 16px;
+            animation: sparkle 3s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes sparkle {
+            to {
+                transform: translateX(-30px) translateY(30px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* カードのグロー効果 */
+        @keyframes cardGlow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+            50% { box-shadow: 0 4px 30px rgba(76, 175, 80, 0.4); }
+        }
+        
+        .data-card:hover {
+            animation: cardGlow 2s ease-in-out infinite;
+        }
+        /* ⭐ 視認性改善スタイル by みく！ */
+        
+        /* 重要な数字は特に見やすく */
+        .status-info h4 {
+            color: #ffffff !important;  /* 真っ白 */
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);  /* グロー効果 */
+        }
+        
+        /* ラベルはやや控えめに */
+        .status-info p {
+            color: #b0bec5 !important;  /* 薄いグレー */
+        }
+        
+        /* データカードのタイトル */
+        .data-card-title {
+            color: #ffffff !important;  /* 白く */
+            font-weight: 600;
+        }
+        
+        /* バッジを見やすく */
+        .data-card-badge {
+            background: rgba(76, 175, 80, 0.3) !important;
+            color: #81c784 !important;
+            font-weight: 600;
+        }
+        
+        /* フォームのラベル */
+        .form-group label {
+            color: #b8b8b8 !important;
+            font-weight: 600;
+        }
+        
+        /* 最近の登録の文字 */
+        .data-card p {
+            color: #e0e0e0 !important;
+        }
+        
+        /* タブの文字 */
+        .tab {
+            color: #999999 !important;
+        }
+        
+        .tab.active {
+            color: #4caf50 !important;
+        }
+        
+        /* ステータスアイテムの背景調整 */
+        .status-item {
+            background: rgba(60, 60, 75, 0.5);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        /* アップロードエリアの文字 */
+        .upload-area p {
+            color: #b8b8b8 !important;
+        }
+        
+        /* 検索ボックスのプレースホルダー */
+        .search-box::placeholder {
+            color: #666666;
+            opacity: 1;
+        }
+
+        /* ボタンの文字を確実に白く */
+        .action-btn {
+            color: #333333 !important;  /* 通常ボタンは暗く */
+        }
+        
+        .action-btn.primary {
+            color: #ffffff !important;  /* プライマリボタンは白 */
+        }
+        
+        .btn-primary {
+            color: #ffffff !important;
+        }
+        
+        .btn-secondary {
+            color: #333333 !important;
+            background: #e0e0e0 !important;
+        }
+        
+        /* レイヤーコントロールの文字 */
+        .layer-control {
+            background: rgba(40, 40, 55, 0.95);
+            color: #f0f0f0;
+        }
+        
+        .layer-control h3 {
+            color: #ffffff !important;
+        }
+        
+        .layer-control p {
+            color: #b8b8b8 !important;
+        }
+        
+        .layer-item {
+            background: rgba(60, 60, 75, 0.5);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        /* ⭐ 診断・評価タブの修正 */
+        
+        /* AI診断カード */
+        #evaluation-content .data-card {
+            background: rgba(40, 40, 55, 0.9) !important;
+            color: #f0f0f0 !important;
+        }
+        
+        /* サブタブボタン */
+        .sub-tab {
+            color: #333333 !important;  /* デフォルトは暗い文字 */
+            background: #e0e0e0 !important;
+            transition: all 0.3s;
+        }
+        
+        .sub-tab.active,
+        .sub-tab[style*="background: #2a5298"] {
+            color: #ffffff !important;  /* アクティブは白文字 */
+            background: linear-gradient(135deg, #006838 0%, #004d40 100%) !important;
+        }
+        
+        /* カード内のテキスト */
+        #evaluation-content p {
+            color: #e0e0e0 !important;
+            line-height: 1.6;
+        }
+        
+        /* ボタンテキスト */
+        #evaluation-content .btn-primary {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #006838 0%, #004d40 100%) !important;
+        }
+        
+        /* 特別なボタン（自動評価） */
+        button[onclick="openHealthChecker()"] {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
+            color: #ffffff !important;
+        }
+        
+        button[onclick="TrackSelector.start()"] {
+            background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%) !important;
+            color: #ffffff !important;
+        }
+        
+        /* ⭐ 保存済みレイヤーリストの改善 */
+        #savedLayersList {
+            background: rgba(20, 20, 30, 0.5);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        /* レイヤーアイテムのスタイル */
+        #savedLayersList > div {
+            background: rgba(40, 40, 55, 0.8) !important;
+            border: 1px solid rgba(76, 175, 80, 0.3) !important;
+            border-radius: 8px;
+            padding: 12px !important;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        #savedLayersList > div:hover {
+            background: rgba(50, 50, 65, 0.9) !important;
+            border-color: rgba(76, 175, 80, 0.6) !important;
+            transform: translateX(5px);
+        }
+        
+        /* レイヤー名 */
+        #savedLayersList p,
+        #savedLayersList span {
+            color: #f0f0f0 !important;
+            margin: 0;
+        }
+        
+        /* ボタンのスタイル統一 */
+        #savedLayersList button {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 6px 12px !important;
+            border-radius: 6px !important;
+            font-size: 12px !important;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 8px;
+        }
+        
+        #savedLayersList button:hover {
+            background: linear-gradient(135deg, #42a5f5 0%, #2196F3 100%) !important;
+            transform: scale(1.05);
+        }
+        
+        /* 削除ボタンは赤系に */
+        #savedLayersList button:last-child {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
+        }
+        
+        #savedLayersList button:last-child:hover {
+            background: linear-gradient(135deg, #ef5350 0%, #f44336 100%) !important;
+        }
+        
+        /* ⭐ 最近の登録リストの改善 */
+        #registrationsList {
+            background: rgba(20, 20, 30, 0.5);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        /* ⭐ 最近の登録リストの改善（修正版） */
+        
+        /* 最近の登録の各アイテム */
+        .data-card > div > div[style*="display: flex"][style*="gap: 12px"] {
+            background: rgba(40, 40, 55, 0.8) !important;
+            border: 1px solid rgba(76, 175, 80, 0.3) !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .data-card > div > div[style*="display: flex"][style*="gap: 12px"]:hover {
+            background: rgba(50, 50, 65, 0.9) !important;
+            border-color: rgba(76, 175, 80, 0.6) !important;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+        
+        /* D12のような分類記号 */
+        .data-card span[style*="color: #dc3545"] {
+            color: #ff6b6b !important;
+            font-weight: bold !important;
+            text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+        }
+        
+        /* タイトルテキスト（盛土のり面崩壊） */
+        .data-card p[style*="font-size: 14px"][style*="font-weight: 500"] {
+            color: #ffffff !important;
+        }
+        
+        /* 場所テキスト（12k500m付近） */
+        .data-card p[style*="font-size: 12px"][style*="color: #666"] {
+            color: #b8b8b8 !important;
+        }
+        
+        /* 時間テキスト（10分前） */
+        .data-card span[style*="font-size: 12px"][style*="color: #999"] {
+            color: #999999 !important;
+        }
+        
+        /* 白い背景を削除 */
+        .data-card div[style*="background: white"] {
+            background: transparent !important;
+        }
+        
+        /* 登録アイテムの基本スタイル */
+        #registrationsList > div > div {
+            background: rgba(40, 40, 55, 0.8) !important;
+            border: 1px solid rgba(76, 175, 80, 0.3) !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        #registrationsList > div > div:hover {
+            background: rgba(50, 50, 65, 0.9) !important;
+            border-color: rgba(76, 175, 80, 0.6) !important;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+        
+        /* 分類タイプの色分け */
+        #registrationsList .defect,
+        #registrationsList span[style*="color: #dc3545"] {
+            color: #ff6b6b !important;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+        }
+        
+        #registrationsList .instability,
+        #registrationsList span[style*="color: #fd7e14"] {
+            color: #ffa94d !important;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 169, 77, 0.5);
+        }
+        
+        #registrationsList .point,
+        #registrationsList span[style*="color: #0d6efd"] {
+            color: #74c0fc !important;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(116, 192, 252, 0.5);
+        }
+        
+        #registrationsList .observation,
+        #registrationsList span[style*="color: #6c757d"] {
+            color: #adb5bd !important;
+            font-weight: bold;
+        }
+        
+        /* テキストの色 */
+        #registrationsList p {
+            color: #e0e0e0 !important;
+            margin: 2px 0 !important;
+        }
+        
+        /* タイトル */
+        #registrationsList p[style*="font-weight: 500"] {
+            color: #ffffff !important;
+            font-size: 14px !important;
+        }
+        
+        /* サブテキスト（場所） */
+        #registrationsList p[style*="font-size: 12px"] {
+            color: #b8b8b8 !important;
+        }
+        
+        /* 時間表示 */
+        #registrationsList span[style*="font-size: 12px"] {
+            color: #999999 !important;
+        }
+        
+        /* ⭐ 分類タイプにアニメーション追加！ */
+        @keyframes typeGlow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        #registrationsList .defect,
+        #registrationsList .instability,
+        #registrationsList .point {
+            animation: typeGlow 2s ease-in-out infinite;
+        }
+        
+        /* ホバー時の特別エフェクト */
+        #registrationsList > div > div::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, #4caf50, transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #registrationsList > div > div:hover::before {
+            opacity: 1;
+        }
+        
+        /* 新規追加時のアニメーション */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        #registrationsList > div > div {
+            animation: slideIn 0.3s ease-out;
+        }
+        /* ⭐ 非アクティブ要素のダークモード化 by みく！ */
+        
+        /* タブナビゲーション全体 */
+        .tab-nav {
+            background: rgba(30, 30, 45, 0.8) !important;
+            border-bottom: 1px solid rgba(76, 175, 80, 0.2) !important;
+        }
+        
+        /* 非アクティブタブ */
+        .tab {
+            background: transparent !important;
+            color: #999999 !important;
+            border-right: 1px solid rgba(76, 175, 80, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .tab:hover {
+            background: rgba(40, 40, 55, 0.5) !important;
+            color: #b8b8b8 !important;
+        }
+        
+        /* アクティブタブ */
+        .tab.active {
+            background: var(--bg-card) !important;
+            color: var(--jrse-accent) !important;
+            border-right: none;
+        }
+        
+        .tab.active::after {
+            background: var(--jrse-primary) !important;
+        }
+        
+        /* 非アクティブボタン */
+        .action-btn {
+            background: rgba(40, 40, 55, 0.8) !important;
+            border: 1px solid rgba(76, 175, 80, 0.2) !important;
+            color: #b8b8b8 !important;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-btn:hover {
+            background: rgba(50, 50, 65, 0.9) !important;
+            border-color: rgba(76, 175, 80, 0.5) !important;
+            color: #e0e0e0 !important;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+        }
+        
+        /* ボタンのアイコンも明るく */
+        .action-icon {
+            filter: brightness(1.2);
+        }
+        
+        /* ホバー時の波紋エフェクト（おまけ！） */
+        .action-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .action-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        /* ⭐⭐⭐ レイヤーツリーのスタイル追加 ⭐⭐⭐ */
+        .layer-tree-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .layer-tree {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .layer-group {
+            margin-bottom: 10px;
+            background: rgba(40, 40, 55, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .layer-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+        }
+        
+        .layer-group-header:hover {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .expand-icon {
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .group-icon {
+            font-size: 16px;
+        }
+        
+        .group-name {
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        .layer-group-content {
+            padding: 8px;
+        }
+        
+        .layer-item-tree {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 2px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .layer-item-tree:hover {
+            background: rgba(76, 175, 80, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .layer-item-tree input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        .layer-item-tree label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .layer-icon {
+            font-size: 16px;
+        }
+        /* ⭐ レイヤーツリーのスタイル ⭐ */
+        .layer-tree-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .layer-tree {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .layer-group {
+            margin-bottom: 10px;
+            background: rgba(40, 40, 55, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .layer-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+        }
+        
+        .layer-group-header:hover {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .expand-icon {
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .layer-item-tree {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 2px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .layer-item-tree:hover {
+            background: rgba(76, 175, 80, 0.15);
+            transform: translateX(5px);
+        }
+        /* レイヤー削除ボタン */
+        .layer-item-tree:hover .layer-delete-btn {
+            opacity: 1 !important;
+        }
+        
+        .layer-delete-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            padding: 4px 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }                        
+    </style>    
 </head>
 <body>
     <div class="app-container">
         <!-- サイドバー -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">🚂</div>
+                <svg width="60" height="60" viewBox="0 0 120 120" style="flex-shrink: 0; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">
+                    <!-- グラデーション定義 -->
+                    <defs>
+                        <linearGradient id="jrseGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#81c784;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#4caf50;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <!-- 背景円 -->
+                    <circle cx="60" cy="60" r="58" fill="rgba(255,255,255,0.1)"/>
+                    <!-- JRSEロゴ -->
+                    <text x="60" y="50" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="white" text-anchor="middle">JRSE</text>
+                    <text x="60" y="70" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle" opacity="0.9">JR SOKEN</text>
+                    <text x="60" y="82" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle" opacity="0.9">ENGINEERING</text>
+                    <text x="60" y="94" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle" opacity="0.9">CO., LTD.</text>
+                </svg>
                 <div class="header-info">
-                    <h1>Railway Health Checker</h1>
-                    <p>土構造物健全度評価システム</p>
+                    <h1 style="font-weight: 300; letter-spacing: 0.05em;">Railway Health Checker</h1>
+                    <p style="opacity: 0.9; font-size: 13px;">土構造物健全度評価システム</p>
                 </div>
             </div>
             
             <div class="tab-nav">
                 <div class="tab active" onclick="switchTab('inspection')">点検</div>
                 <div class="tab" onclick="switchTab('layers')">レイヤー</div>
-                <div class="tab" onclick="switchTab('analysis')">分析</div>
+                <div class="tab" onclick="switchTab('evaluation')">診断・評価</div>
             </div>
             
             <div class="sidebar-content">
@@ -1064,6 +2031,77 @@
                     </div>
                 </div>
                 
+                <!-- 登録済み地点一覧 -->
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">登録済み地点</h3>
+                        <button onclick="RegistrationManager.updateSidebarList()" 
+                                style="padding: 4px 8px; background: #2a5298; color: white; 
+                                       border: none; border-radius: 6px; cursor: pointer; font-size: 11px;">
+                            🔄 更新
+                        </button>
+                    </div>
+                    <div id="registrationsList" style="max-height: 400px; overflow-y: auto;">
+                        <p style="text-align: center; color: #999; padding: 20px;">
+                            読み込み中...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 診断・評価タブコンテンツ -->
+                <div class="tab-content" id="evaluation-content" style="display: none;">
+                    <!-- サブタブ -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button class="sub-tab active" onclick="switchSubTab('ai')" style="flex: 1; padding: 10px; background: #2a5298; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            🤖 AI診断
+                        </button>
+                        <button class="sub-tab" onclick="switchSubTab('auto')" style="flex: 1; padding: 10px; background: #e0e0e0; color: #333; border: none; border-radius: 8px; cursor: pointer;">
+                            🚂 自動評価
+                        </button>
+                    </div>
+                    
+                    <!-- AI診断サブコンテンツ -->
+                    <div id="ai-sub-content" style="display: block;">
+                        <div class="data-card">
+                            <div class="data-card-header">
+                                <h3 class="data-card-title">🤖 AI診断アシスタント</h3>
+                            </div>
+                            <div style="padding: 20px;">
+                                <p style="margin-bottom: 15px; line-height: 1.6;">
+                                    現場で撮影した写真と状況説明をAIが分析し、<br>
+                                    維持管理標準に基づいて健全度を判定します。
+                                </p>
+                                <button class="btn-primary" onclick="openAIDiagnosis()" style="width: 100%;">
+                                    AI診断を開始
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 自動評価サブコンテンツ -->
+                    <div id="auto-sub-content" style="display: none;">
+                        <div class="data-card">
+                            <div class="data-card-header">
+                                <h3 class="data-card-title">🚂 自動健全度評価システム</h3>
+                            </div>
+                            <div style="padding: 20px;">
+                                <p style="margin-bottom: 15px; line-height: 1.6;">
+                                    線路座標を入力すると、地形・地質データから<br>
+                                    土構造物の健全度を自動的に評価します。
+                                </p>
+                                <button class="btn-primary" onclick="openHealthChecker()" style="width: 100%; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                                    自動評価システムを起動
+                                </button>
+                                <button class="btn-primary" onclick="TrackSelector.start()" 
+                                        style="width: 100%; margin-top: 10px; 
+                                               background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);">
+                                    🎯 地図上で線路3点を選択
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                                
                 <!-- 新規登録パネル -->
                 <div class="registration-panel" id="registrationPanel" style="display: none;">
                     <div class="panel-header">
@@ -1146,11 +2184,26 @@
                         
                         <div class="form-group">
                             <label>現場写真</label>
-                            <div class="photo-upload-area">
+                            <div class="photo-upload-area" id="photoUploadArea">
                                 <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
-                                <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
-                                    📷 写真を追加
-                                </button>
+                                <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display: none;">
+                                
+                                <div class="upload-options">
+                                    <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
+                                        📁 ファイル選択
+                                    </button>
+                                    <button class="upload-btn" onclick="document.getElementById('cameraInput').click()">
+                                        📸 写真撮影
+                                    </button>
+                                    <button class="upload-btn" onclick="RegistrationManager.pasteFromClipboard()">
+                                        📋 クリップボード
+                                    </button>
+                                </div>
+                                
+                                <div class="drop-zone" id="dropZone">
+                                    <p>📂 ここに画像をドラッグ&ドロップ</p>
+                                </div>
+                                
                                 <div class="photo-preview" id="photoPreview"></div>
                             </div>
                         </div>
@@ -1302,9 +2355,658 @@
     <script src="https://cdn.jsdelivr.net/npm/ol@7.5.2/dist/ol.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/geotiff@2.0.7/dist-browser/geotiff.js"></script>
     <script>
-        // ダミー関数（実装例）
+        
+// ⭐⭐⭐ レイヤータブ完全修正版 by みく ⭐⭐⭐
+        
+        // グローバル変数でレイヤー状態を保持
+        window.layerStates = window.layerStates || {
+            'gsi-std': true,
+            'gsi-pale': false,
+            'gsi-photo': false,
+            'google-sat': false,
+            'google-hybrid': false,
+            'google-roads': false,
+            'osm': false,
+            'slope': false,
+            'cs-map': false,
+            'relief': false,
+            'redrelief': false,
+            'geotiff': false,
+            'registrations': true
+        };
+        
+        // 透明度も保持
+        window.layerOpacities = window.layerOpacities || {
+            'gsi-std': 100,
+            'gsi-pale': 100,
+            'gsi-photo': 100,
+            'google-sat': 100,
+            'google-hybrid': 100,
+            'google-roads': 100,
+            'osm': 100,
+            'slope': 70,
+            'cs-map': 70,
+            'relief': 70,
+            'redrelief': 70,
+            'geotiff': 70,
+            'registrations': 100
+        };
+        
+        // レイヤータブのコンテンツ（完全修正版）
+        function createLayerTabContent() {
+            return `
+                <div class="layer-tree-container">
+                    <!-- ⭐ レイヤー追加ボタン ⭐ -->
+                    <div style="padding: 10px; border-bottom: 1px solid rgba(76, 175, 80, 0.2);">
+                        <button onclick="showAddLayerDialog()" style="
+                            width: 100%;
+                            padding: 12px;
+                            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 600;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            transition: all 0.3s;
+                            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                        ">
+                            <span style="font-size: 18px;">➕</span>
+                            新しいレイヤーを追加
+                        </button>
+                    </div>
+                    
+                    <!-- ⭐ みくのアイデア：プリセット機能！ ⭐ -->
+                    <div style="padding: 10px; border-bottom: 1px solid rgba(76, 175, 80, 0.2);">
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="applyPreset('terrain')" style="
+                                flex: 1;
+                                padding: 8px;
+                                background: rgba(76, 175, 80, 0.2);
+                                color: #4caf50;
+                                border: 1px solid rgba(76, 175, 80, 0.3);
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 12px;
+                                transition: all 0.3s;
+                            ">🏔️ 地形解析</button>
+                            <button onclick="applyPreset('photo')" style="
+                                flex: 1;
+                                padding: 8px;
+                                background: rgba(76, 175, 80, 0.2);
+                                color: #4caf50;
+                                border: 1px solid rgba(76, 175, 80, 0.3);
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 12px;
+                                transition: all 0.3s;
+                            ">📷 航空写真</button>
+                            <button onclick="applyPreset('hybrid')" style="
+                                flex: 1;
+                                padding: 8px;
+                                background: rgba(76, 175, 80, 0.2);
+                                color: #4caf50;
+                                border: 1px solid rgba(76, 175, 80, 0.3);
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 12px;
+                                transition: all 0.3s;
+                            ">🌐 ハイブリッド</button>
+                        </div>
+                    </div>
+                    
+                    <div class="layer-tree">
+                        <!-- ベースマップグループ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>🗺️ ベースマップ</span>
+                            </div>
+                            <div class="layer-group-content">
+                                ${createLayerItem('gsi-std', '🗾 国土地理院 標準')}
+                                ${createLayerItem('gsi-pale', '🗾 国土地理院 淡色')}
+                                ${createLayerItem('gsi-photo', '📷 国土地理院 航空写真')}
+                                ${createLayerItem('google-sat', '🌍 Google 衛星画像')}
+                                ${createLayerItem('google-hybrid', '🌐 Google ハイブリッド')}
+                                ${createLayerItem('google-roads', '🗺️ Google 道路地図')}
+                                ${createLayerItem('osm', '🌏 OpenStreetMap')}
+                            </div>
+                        </div>
+                        
+                        <!-- 地形表現グループ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>🏔️ 地形表現</span>
+                            </div>
+                            <div class="layer-group-content">
+                                ${createLayerItem('slope', '📊 傾斜量図')}
+                                ${createLayerItem('cs-map', '🗻 CS立体図')}
+                                ${createLayerItem('relief', '⛰️ 陰影起伏図')}
+                                ${createLayerItem('redrelief', '🔴 赤色立体地図')}
+                            </div>
+                        </div>
+                        
+                        <!-- オーバーレイグループ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>📍 オーバーレイ</span>
+                            </div>
+                            <div class="layer-group-content">
+                                ${createLayerItem('geotiff', '📐 GeoTIFF')}
+                                ${createLayerItem('registrations', '📌 登録地点')}
+                            </div>
+                        </div>
+                        
+                        <!-- カスタムレイヤーグループ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>🌐 カスタムレイヤー</span>
+                            </div>
+                            <div class="layer-group-content" id="custom-layers">
+                                <p style="color: #999; text-align: center; padding: 20px;">
+                                    カスタムレイヤーはありません
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // レイヤーアイテム生成（透明度スライダー付き）
+        function createLayerItem(layerId, label) {
+            const checked = window.layerStates[layerId] ? 'checked' : '';
+            const opacity = window.layerOpacities[layerId] || 100;
+            
+            return `
+                <div class="layer-item-tree" data-layer-id="${layerId}">
+                    <input type="checkbox" id="tree-${layerId}" ${checked}>
+                    <label for="tree-${layerId}" style="flex: 1;">${label}</label>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 10px; color: #999;">${opacity}%</span>
+                        <input type="range" 
+                               class="layer-opacity-slider"
+                               data-layer-id="${layerId}"
+                               min="0" max="100" 
+                               value="${opacity}" 
+                               style="width: 60px; height: 4px; cursor: pointer;"
+                               onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            `;
+        }
+        
+        // イベント設定（修正版）
+        function setupLayerTreeEvents() {
+            // チェックボックスイベント（排他制御なし）
+            document.querySelectorAll('.layer-item-tree input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const layerId = this.closest('.layer-item-tree').dataset.layerId;
+                    window.layerStates[layerId] = this.checked;
+                    toggleLayerVisibility(layerId, this.checked);
+                    saveLayerStates();
+                });
+            });
+            
+            // 透明度スライダーイベント
+            document.querySelectorAll('.layer-opacity-slider').forEach(slider => {
+                slider.addEventListener('input', function(e) {
+                    e.stopPropagation();
+                    const layerId = this.dataset.layerId;
+                    const opacity = this.value;
+                    window.layerOpacities[layerId] = parseInt(opacity);
+                    
+                    // 透明度表示更新
+                    this.previousElementSibling.textContent = opacity + '%';
+                    
+                    // レイヤーに反映
+                    updateLayerOpacity(layerId, opacity / 100);
+                    saveLayerStates();
+                });
+            });
+        }
+        
+        // レイヤー透明度更新
+        function updateLayerOpacity(layerId, opacity) {
+            const layer = getLayerById(layerId);
+            if (layer) {
+                layer.setOpacity(opacity);
+            }
+        }
+        
+        // レイヤー取得関数
+        function getLayerById(layerId) {
+            switch(layerId) {
+                case 'gsi-std': return map.getLayers().item(0);
+                case 'gsi-pale': return window.gsiPale;
+                case 'gsi-photo': return window.gsiPhoto;
+                case 'google-sat': return window.googleSatellite;
+                case 'google-hybrid': return window.googleHybrid;
+                case 'google-roads': return window.googleRoads;
+                case 'osm': return window.osmLayer;
+                case 'slope': return window.slopeMap;
+                case 'cs-map': return window.csMap;
+                case 'relief': return window.reliefMap;
+                case 'redrelief': return window.redReliefMap;
+                case 'geotiff': return window.GeoTIFFManager?.tiffLayer;
+                case 'registrations': return window.RegistrationManager?.vectorLayer;
+                default: 
+                    if (layerId.startsWith('custom-')) {
+                        return window.customLayers[layerId]?.layer;
+                    }
+                    return null;
+            }
+        }
+        
+        // レイヤー表示切り替え（修正版）
+        function toggleLayerVisibility(layerId, visible) {
+            const layer = getLayerById(layerId);
+            if (layer) {
+                layer.setVisible(visible);
+                
+                // GeoTIFFの場合は特別処理
+                if (layerId === 'geotiff') {
+                    const tiffToggle = document.getElementById('tiffToggle');
+                    if (tiffToggle) tiffToggle.checked = visible;
+                }
+            }
+        }
+        
+        // プリセット適用（みくのアイデア！）
+        function applyPreset(preset) {
+            // 全レイヤーOFF
+            Object.keys(window.layerStates).forEach(key => {
+                window.layerStates[key] = false;
+            });
+            
+            switch(preset) {
+                case 'terrain':
+                    window.layerStates['gsi-std'] = true;
+                    window.layerStates['slope'] = true;
+                    window.layerStates['relief'] = true;
+                    window.layerOpacities['slope'] = 60;
+                    window.layerOpacities['relief'] = 40;
+                    break;
+                case 'photo':
+                    window.layerStates['google-sat'] = true;
+                    window.layerStates['registrations'] = true;
+                    break;
+                case 'hybrid':
+                    window.layerStates['google-hybrid'] = true;
+                    window.layerStates['registrations'] = true;
+                    window.layerStates['geotiff'] = true;
+                    window.layerOpacities['geotiff'] = 70;
+                    break;
+            }
+            
+            // UI更新
+            updateLayerUI();
+            applyLayerStates();
+            saveLayerStates();
+        }
+        
+        // UI更新
+        function updateLayerUI() {
+            Object.entries(window.layerStates).forEach(([layerId, checked]) => {
+                const checkbox = document.getElementById(`tree-${layerId}`);
+                if (checkbox) checkbox.checked = checked;
+            });
+            
+            Object.entries(window.layerOpacities).forEach(([layerId, opacity]) => {
+                const slider = document.querySelector(`.layer-opacity-slider[data-layer-id="${layerId}"]`);
+                if (slider) {
+                    slider.value = opacity;
+                    slider.previousElementSibling.textContent = opacity + '%';
+                }
+            });
+        }
+        
+        // 状態適用
+        function applyLayerStates() {
+            Object.entries(window.layerStates).forEach(([layerId, visible]) => {
+                toggleLayerVisibility(layerId, visible);
+            });
+            
+            Object.entries(window.layerOpacities).forEach(([layerId, opacity]) => {
+                updateLayerOpacity(layerId, opacity / 100);
+            });
+        }
+        
+        // LocalStorageに保存
+        function saveLayerStates() {
+            localStorage.setItem('layerStates', JSON.stringify(window.layerStates));
+            localStorage.setItem('layerOpacities', JSON.stringify(window.layerOpacities));
+        }
+        
+        // LocalStorageから読み込み
+        function loadLayerStates() {
+            const states = localStorage.getItem('layerStates');
+            const opacities = localStorage.getItem('layerOpacities');
+            
+            if (states) {
+                window.layerStates = JSON.parse(states);
+            }
+            if (opacities) {
+                window.layerOpacities = JSON.parse(opacities);
+            }
+        }
+        
+        // ⭐ GeoTIFF追加ダイアログ（新機能）
+        function showAddLayerDialog() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: #1a1f1e;
+                    border: 1px solid rgba(76, 175, 80, 0.3);
+                    border-radius: 12px;
+                    padding: 30px;
+                    max-width: 500px;
+                    width: 90%;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                ">
+                    <h3 style="color: #4caf50; margin-bottom: 20px;">🗺️ 新しいレイヤーを追加</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <button onclick="selectLayerType('tile')" id="tile-btn" style="
+                            padding: 10px 20px;
+                            background: #4caf50;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            margin-right: 10px;
+                        ">タイルレイヤー</button>
+                        <button onclick="selectLayerType('geotiff')" id="geotiff-btn" style="
+                            padding: 10px 20px;
+                            background: #666;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">GeoTIFF</button>
+                    </div>
+                    
+                    <div id="tile-form">
+                        <div style="margin-bottom: 15px;">
+                            <label style="color: #b8b8b8; display: block; margin-bottom: 5px;">レイヤー名</label>
+                            <input type="text" id="layerName" placeholder="例：赤色立体地図" style="
+                                width: 100%;
+                                padding: 10px;
+                                background: rgba(0,0,0,0.3);
+                                border: 1px solid rgba(76, 175, 80, 0.3);
+                                color: #e0e0e0;
+                                border-radius: 6px;
+                            ">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="color: #b8b8b8; display: block; margin-bottom: 5px;">タイルURL</label>
+                            <input type="text" id="layerUrl" placeholder="https://example.com/{z}/{x}/{y}.png" style="
+                                width: 100%;
+                                padding: 10px;
+                                background: rgba(0,0,0,0.3);
+                                border: 1px solid rgba(76, 175, 80, 0.3);
+                                color: #e0e0e0;
+                                border-radius: 6px;
+                            ">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="color: #b8b8b8; display: block; margin-bottom: 5px;">Attribution</label>
+                            <input type="text" id="layerAttribution" placeholder="© データ提供元" style="
+                                width: 100%;
+                                padding: 10px;
+                                background: rgba(0,0,0,0.3);
+                                border: 1px solid rgba(76, 175, 80, 0.3);
+                                color: #e0e0e0;
+                                border-radius: 6px;
+                            ">
+                        </div>
+                    </div>
+                    
+                    <div id="geotiff-form" style="display: none;">
+                        <div style="
+                            border: 2px dashed rgba(76, 175, 80, 0.5);
+                            border-radius: 12px;
+                            padding: 40px;
+                            text-align: center;
+                            cursor: pointer;
+                        " onclick="document.getElementById('geotiffFileInput').click()">
+                            <p style="font-size: 24px; margin-bottom: 10px;">📂</p>
+                            <p style="color: #b8b8b8;">GeoTIFFファイルを選択</p>
+                            <input type="file" id="geotiffFileInput" accept=".tif,.tiff" style="display: none;">
+                        </div>
+                        <div id="geotiff-preview" style="margin-top: 10px; color: #4caf50;"></div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="this.closest('.modal').remove()" style="
+                            padding: 10px 20px;
+                            background: #666;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">キャンセル</button>
+                        <button onclick="addLayer()" style="
+                            padding: 10px 20px;
+                            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">追加</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('modal');
+            document.body.appendChild(modal);
+            
+            // GeoTIFFファイル選択イベント
+            document.getElementById('geotiffFileInput').addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    document.getElementById('geotiff-preview').textContent = `選択: ${file.name}`;
+                    window.selectedGeoTIFF = file;
+                }
+            });
+        }
+        
+        // レイヤータイプ選択
+        window.currentLayerType = 'tile';
+        function selectLayerType(type) {
+            window.currentLayerType = type;
+            document.getElementById('tile-form').style.display = type === 'tile' ? 'block' : 'none';
+            document.getElementById('geotiff-form').style.display = type === 'geotiff' ? 'block' : 'none';
+            
+            document.getElementById('tile-btn').style.background = type === 'tile' ? '#4caf50' : '#666';
+            document.getElementById('geotiff-btn').style.background = type === 'geotiff' ? '#4caf50' : '#666';
+        }
+        
+        // レイヤー追加
+        function addLayer() {
+            if (window.currentLayerType === 'tile') {
+                addCustomLayer();
+            } else {
+                if (window.selectedGeoTIFF) {
+                    GeoTIFFManager.handleFile(window.selectedGeoTIFF);
+                    document.querySelector('.modal').remove();
+                } else {
+                    alert('GeoTIFFファイルを選択してください！');
+                }
+            }
+        }
+        
+        // 既存のaddCustomLayer関数は修正不要
+        
+        // タブ切り替え時の処理を修正
+        window.originalSwitchTab = window.switchTab;
+        window.switchTab = function(tab) {
+            // 元の処理を実行
+            originalSwitchTab(tab);
+            
+            // レイヤータブの場合は状態を復元
+            if (tab === 'layers') {
+                setTimeout(() => {
+                    loadLayerStates();
+                    updateLayerUI();
+                    applyLayerStates();
+                }, 100);
+            }
+        };
+        
+        // ⭐ 赤色立体地図の追加（きよしさんのファイル用）
+        function addRedReliefMap() {
+            if (!window.redReliefMap) {
+                window.redReliefMap = new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        // きよしさんのファイルパスに合わせて変更してね！
+                        url: 'file:///path/to/redrelief/{z}/{x}/{y}.png',
+                        attributions: '© 赤色立体地図',
+                        maxZoom: 18
+                    }),
+                    visible: false,
+                    opacity: 0.7
+                });
+                map.addLayer(window.redReliefMap);
+            }
+        }
+        
+        // 初期化時に呼び出し
+        setTimeout(() => {
+            loadLayerStates();
+            addRedReliefMap();
+        }, 1000);        
+
+        // タブ切り替え関数
         function switchTab(tab) {
             console.log('Switching to tab:', tab);
+            
+            // タブボタンの更新
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            
+            // sidebar-content内の全要素を取得
+            const sidebarContent = document.querySelector('.sidebar-content');
+            
+            // レイヤータブの場合
+            if (tab === 'layers') {
+                // 元のHTMLを保存
+                if (!window.originalSidebarContent) {
+                    window.originalSidebarContent = sidebarContent.innerHTML;
+                }
+                // レイヤー専用コンテンツを表示
+                sidebarContent.innerHTML = createLayerTabContent();
+                setupLayerTreeEvents();
+                
+            }
+            // その他のタブの場合
+            else {
+                // 元のHTMLに戻す
+                if (window.originalSidebarContent) {
+                    sidebarContent.innerHTML = window.originalSidebarContent;
+                }
+                
+                const allElements = sidebarContent.children;
+                
+                if (tab === 'evaluation') {
+                    // 全部非表示
+                    for (let el of allElements) {
+                        el.style.display = 'none';
+                    }
+                    // evaluation-contentだけ表示
+                    const evalContent = document.getElementById('evaluation-content');
+                    if (evalContent) evalContent.style.display = 'block';
+                } else {
+                    // 点検タブの場合は元に戻す
+                    for (let el of allElements) {
+                        if (el.id !== 'evaluation-content') {
+                            el.style.display = '';
+                        } else {
+                            el.style.display = 'none';
+                        }
+                    }
+                }
+            }
+        }
+        
+        // サブタブ切り替え（新規追加）
+        function switchSubTab(subtab) {
+            // サブタブボタンの更新
+            document.querySelectorAll('.sub-tab').forEach(btn => {
+                btn.style.background = '#e0e0e0';
+                btn.style.color = '#333';
+            });
+            if (event && event.target) {
+                event.target.style.background = '#2a5298';
+                event.target.style.color = 'white';
+            }
+            
+            // サブコンテンツの切り替え
+            document.getElementById('ai-sub-content').style.display = subtab === 'ai' ? 'block' : 'none';
+            document.getElementById('auto-sub-content').style.display = subtab === 'auto' ? 'block' : 'none';
+        }
+        
+        // AI診断を開く（新規追加）
+        function openAIDiagnosis() {
+            alert('AI診断機能を統合予定です！\n写真と説明文から健全度を自動判定します。');
+        }
+        
+        // 自動評価を開く（新規追加）  
+        function openHealthChecker() {
+            // 現在の地図中心座標を取得
+            const mapCenter = map.getView().getCenter();
+            const lonLat = ol.proj.toLonLat(mapCenter);
+            
+            // URLパラメータとして座標を渡す
+            const params = new URLSearchParams({
+                lat: lonLat[1].toFixed(6),
+                lon: lonLat[0].toFixed(6),
+                returnResult: 'true'
+            });
+            
+            // 新しいウィンドウで開く
+            const healthWindow = window.open(
+                `railway-health-checker.html?${params}`, 
+                'healthChecker',
+                'width=1400,height=900'
+            );
+            
+            // 結果を受け取るリスナー
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'healthCheckResult') {
+                    handleHealthCheckResult(event.data.result);
+                }
+            }, { once: true });
+        }
+        
+        // 健全度評価結果を地図に反映（新規追加）
+        function handleHealthCheckResult(result) {
+            console.log('評価結果を受信:', result);
+            alert(`自動評価完了！\n健全度: ${result.health_grade}\n地図への登録機能は開発中...`);
         }
         
         function startNewInspection() {
@@ -1359,9 +3061,411 @@
                 zoom: 12
             })
         });
+        // ⭐ この3つの関数を2593行目の直前に追加！ ⭐
+        
+// レイヤータブのコンテンツ（完全版）
+        function createLayerTabContent() {
+            return `
+                <div class="layer-tree-container">
+                    <!-- ⭐ レイヤー追加ボタン ⭐ -->
+                    <div style="padding: 10px; border-bottom: 1px solid rgba(76, 175, 80, 0.2);">
+                        <button onclick="showAddLayerDialog()" style="
+                            width: 100%;
+                            padding: 12px;
+                            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 600;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            transition: all 0.3s;
+                            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" 
+                          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
+                            <span style="font-size: 18px;">➕</span>
+                            新しいレイヤーを追加
+                        </button>
+                    </div>
+                    
+                    <div class="layer-tree">
+                        <!-- ベースマップグループ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>🗺️ ベースマップ</span>
+                            </div>
+                            <div class="layer-group-content">
+                                <div class="layer-item-tree" data-layer-id="gsi-std">
+                                    <input type="checkbox" id="tree-gsi-std" checked>
+                                    <label for="tree-gsi-std">🗾 国土地理院 標準</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="gsi-pale">
+                                    <input type="checkbox" id="tree-gsi-pale">
+                                    <label for="tree-gsi-pale">🗾 国土地理院 淡色</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="gsi-photo">
+                                    <input type="checkbox" id="tree-gsi-photo">
+                                    <label for="tree-gsi-photo">📷 国土地理院 航空写真</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="google-sat">
+                                    <input type="checkbox" id="tree-google-sat">
+                                    <label for="tree-google-sat">🌍 Google 衛星画像</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="google-hybrid">
+                                    <input type="checkbox" id="tree-google-hybrid">
+                                    <label for="tree-google-hybrid">🌐 Google ハイブリッド</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="google-roads">
+                                    <input type="checkbox" id="tree-google-roads">
+                                    <label for="tree-google-roads">🗺️ Google 道路地図</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="osm">
+                                    <input type="checkbox" id="tree-osm">
+                                    <label for="tree-osm">🌏 OpenStreetMap</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 地形表現グループ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>🏔️ 地形表現</span>
+                            </div>
+                            <div class="layer-group-content">
+                                <div class="layer-item-tree" data-layer-id="slope">
+                                    <input type="checkbox" id="tree-slope">
+                                    <label for="tree-slope">📊 傾斜量図</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="cs-map">
+                                    <input type="checkbox" id="tree-cs-map">
+                                    <label for="tree-cs-map">🗻 CS立体図</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="relief">
+                                    <input type="checkbox" id="tree-relief">
+                                    <label for="tree-relief">⛰️ 陰影起伏図</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- オーバーレイグループ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>📍 オーバーレイ</span>
+                            </div>
+                            <div class="layer-group-content">
+                                <div class="layer-item-tree" data-layer-id="geotiff">
+                                    <input type="checkbox" id="tree-geotiff" disabled>
+                                    <label for="tree-geotiff">📐 GeoTIFF</label>
+                                </div>
+                                <div class="layer-item-tree" data-layer-id="registrations">
+                                    <input type="checkbox" id="tree-registrations" checked>
+                                    <label for="tree-registrations">📌 登録地点</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ⭐ カスタムレイヤーグループ ⭐ -->
+                        <div class="layer-group">
+                            <div class="layer-group-header" onclick="toggleLayerGroup(this)">
+                                <span class="expand-icon">▼</span>
+                                <span>🌐 カスタムレイヤー</span>
+                            </div>
+                            <div class="layer-group-content" id="custom-layers">
+                                <p style="color: #999; text-align: center; padding: 20px;">
+                                    カスタムレイヤーはありません
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // レイヤー追加ダイアログ
+        function showAddLayerDialog() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: #1a1f1e;
+                    border: 1px solid rgba(76, 175, 80, 0.3);
+                    border-radius: 12px;
+                    padding: 30px;
+                    max-width: 500px;
+                    width: 90%;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                ">
+                    <h3 style="color: #4caf50; margin-bottom: 20px;">🗺️ 新しいレイヤーを追加</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #b8b8b8; display: block; margin-bottom: 5px;">レイヤー名</label>
+                        <input type="text" id="layerName" placeholder="例：OpenStreetMap" style="
+                            width: 100%;
+                            padding: 10px;
+                            background: rgba(0,0,0,0.3);
+                            border: 1px solid rgba(76, 175, 80, 0.3);
+                            color: #e0e0e0;
+                            border-radius: 6px;
+                        ">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #b8b8b8; display: block; margin-bottom: 5px;">タイルURL</label>
+                        <input type="text" id="layerUrl" placeholder="https://tile.openstreetmap.org/{z}/{x}/{y}.png" style="
+                            width: 100%;
+                            padding: 10px;
+                            background: rgba(0,0,0,0.3);
+                            border: 1px solid rgba(76, 175, 80, 0.3);
+                            color: #e0e0e0;
+                            border-radius: 6px;
+                        ">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #b8b8b8; display: block; margin-bottom: 5px;">Attribution</label>
+                        <input type="text" id="layerAttribution" placeholder="© OpenStreetMap contributors" style="
+                            width: 100%;
+                            padding: 10px;
+                            background: rgba(0,0,0,0.3);
+                            border: 1px solid rgba(76, 175, 80, 0.3);
+                            color: #e0e0e0;
+                            border-radius: 6px;
+                        ">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="this.closest('.modal').remove()" style="
+                            padding: 10px 20px;
+                            background: #666;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">キャンセル</button>
+                        <button onclick="addCustomLayer()" style="
+                            padding: 10px 20px;
+                            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">追加</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('modal');
+            document.body.appendChild(modal);
+        }
+        
+        // カスタムレイヤー追加
+        window.customLayers = window.customLayers || {};
+        
+        function addCustomLayer() {
+            const name = document.getElementById('layerName').value;
+            const url = document.getElementById('layerUrl').value;
+            const attribution = document.getElementById('layerAttribution').value;
+            
+            if (!name || !url) {
+                alert('レイヤー名とURLは必須です！');
+                return;
+            }
+            
+            // ユニークなID生成
+            const layerId = 'custom-' + Date.now();
+            
+            // レイヤー作成
+            const newLayer = new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: url,
+                    attributions: attribution || ''
+                }),
+                visible: false
+            });
+            
+            // 保存
+            window.customLayers[layerId] = {
+                name: name,
+                layer: newLayer,
+                url: url,
+                attribution: attribution
+            };
+            
+            // 地図に追加
+            map.addLayer(newLayer);
+            
+            // UIに追加
+            const customLayersDiv = document.getElementById('custom-layers');
+            if (customLayersDiv.querySelector('p')) {
+                customLayersDiv.innerHTML = '';
+            }
+            
+            const layerItem = document.createElement('div');
+            layerItem.className = 'layer-item-tree';
+            layerItem.dataset.layerId = layerId;
+            layerItem.innerHTML = `
+                <input type="checkbox" id="tree-${layerId}">
+                <label for="tree-${layerId}">🌐 ${name}</label>
+                <button onclick="removeLayer('${layerId}')" class="layer-delete-btn">🗑️</button>
+            `;
+            
+            customLayersDiv.appendChild(layerItem);
+            
+            // イベント再設定
+            setupLayerTreeEvents();
+            
+            // モーダル閉じる
+            document.querySelector('.modal').remove();
+            
+            // LocalStorageに保存
+            saveLayersToStorage();
+        }
+        
+        // レイヤー削除
+        function removeLayer(layerId) {
+            if (confirm('このレイヤーを削除しますか？')) {
+                // カスタムレイヤーの場合
+                if (layerId.startsWith('custom-')) {
+                    const layerInfo = window.customLayers[layerId];
+                    if (layerInfo) {
+                        map.removeLayer(layerInfo.layer);
+                        delete window.customLayers[layerId];
+                    }
+                }
+                
+                // UIから削除
+                const layerItem = document.querySelector(`[data-layer-id="${layerId}"]`);
+                if (layerItem) {
+                    layerItem.remove();
+                }
+                
+                // 保存
+                saveLayersToStorage();
+            }
+        }
+        
+        // LocalStorageに保存
+        function saveLayersToStorage() {
+            const layers = [];
+            for (const [id, info] of Object.entries(window.customLayers)) {
+                layers.push({
+                    id: id,
+                    name: info.name,
+                    url: info.url,
+                    attribution: info.attribution
+                });
+            }
+            localStorage.setItem('customLayers', JSON.stringify(layers));
+        }
+        
+        // 起動時に復元
+        function loadLayersFromStorage() {
+            const saved = localStorage.getItem('customLayers');
+            if (saved) {
+                const layers = JSON.parse(saved);
+                layers.forEach(layerInfo => {
+                    // レイヤー復元処理
+                    // ... (省略)
+                });
+            }
+        }
+        
+        // グループ開閉
+        function toggleLayerGroup(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.expand-icon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▶';
+            }
+        }
+        
+        // イベント設定（完全版）
+        function setupLayerTreeEvents() {
+            document.querySelectorAll('.layer-item-tree input').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const layerId = this.closest('.layer-item-tree').dataset.layerId;
+                    
+                    // 選択されたレイヤーの表示切り替え
+                    toggleLayerVisibility(layerId, this.checked);
+                });
+            });
+        }
+        
+        // レイヤー表示切り替え関数
+        function toggleLayerVisibility(layerId, visible) {
+            switch(layerId) {
+                case 'gsi-std':
+                    map.getLayers().item(0).setVisible(visible);
+                    break;
+                case 'gsi-pale':
+                    if (window.gsiPale) gsiPale.setVisible(visible);
+                    break;
+                case 'gsi-photo':
+                    if (window.gsiPhoto) gsiPhoto.setVisible(visible);
+                    break;
+                case 'google-sat':
+                    if (window.googleSatellite) googleSatellite.setVisible(visible);
+                    break;
+                case 'google-hybrid':
+                    if (window.googleHybrid) googleHybrid.setVisible(visible);
+                    break;
+                case 'google-roads':
+                    if (window.googleRoads) googleRoads.setVisible(visible);
+                    break;
+                case 'osm':
+                    if (window.osmLayer) osmLayer.setVisible(visible);
+                    break;
+                case 'slope':
+                    if (window.slopeMap) slopeMap.setVisible(visible);
+                    break;
+                case 'cs-map':
+                    if (window.csMap) csMap.setVisible(visible);
+                    break;
+                    
+                // ⭐⭐⭐ ここに追加！！ ⭐⭐⭐
+                case 'relief':
+                    if (window.reliefMap) window.reliefMap.setVisible(visible);
+                    break;
+                case 'geotiff':
+                    if (window.GeoTIFFManager && window.GeoTIFFManager.currentLayer) {
+                        window.GeoTIFFManager.currentLayer.setVisible(visible);
+                    }
+                    const tiffToggle = document.getElementById('tiffToggle');
+                    if (tiffToggle) tiffToggle.checked = visible;
+                    break;
+                case 'registrations':
+                    if (window.RegistrationManager && window.RegistrationManager.vectorLayer) {
+                        window.RegistrationManager.vectorLayer.setVisible(visible);
+                    }
+                    break;
+            }
+        }    
     </script>
-    });
-    </script>
+
 
     <!-- proj4js追加 -->
     <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.0/dist/proj4.js"></script>
@@ -1372,6 +3476,167 @@
         // OpenLayersに登録
         ol.proj.proj4.register(proj4);
     </script>
+    <!-- ⭐⭐⭐ 新しいレイヤー追加スクリプト ⭐⭐⭐ -->
+    <script>
+        // 追加レイヤーの定義
+        window.googleSatellite = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                attributions: '© Google',
+                maxZoom: 20
+            }),
+            visible: false,
+            properties: { title: 'Google衛星画像' }
+        });
+        
+        // ⭐⭐⭐ ここから追加！！ ⭐⭐⭐
+        // 国土地理院 淡色地図
+        window.gsiPale = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',
+                attributions: '© 国土地理院'
+            }),
+            visible: false
+        });
+        
+        // 国土地理院 航空写真
+        window.gsiPhoto = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
+                attributions: '© 国土地理院'
+            }),
+            visible: false
+        });
+        
+        // Google ハイブリッド
+        window.googleHybrid = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                attributions: '© Google',
+                maxZoom: 20
+            }),
+            visible: false
+        });
+        
+        // Google 道路地図
+        window.googleRoads = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                attributions: '© Google',
+                maxZoom: 20
+            }),
+            visible: false
+        });
+        
+        // OpenStreetMap
+        window.osmLayer = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                attributions: '© OpenStreetMap contributors'
+            }),
+            visible: false
+        });
+        
+        // CS立体図
+        window.csMap = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://shiworks.xsrv.jp/raster-tiles/pref-kanagawa/kanagawapc-cs-tiles/{z}/{x}/{y}.png',
+                attributions: '© 神奈川県',
+                maxZoom: 18
+            }),
+            visible: false
+        });
+        
+        // 陰影起伏図
+        window.reliefMap = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://cyberjapandata.gsi.go.jp/xyz/hillshade/{z}/{x}/{y}.png',
+                attributions: '© 国土地理院'
+            }),
+            visible: false
+        });
+        
+        // 傾斜量図（既存）
+        window.slopeMap = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://cyberjapandata.gsi.go.jp/xyz/slopemap/{z}/{x}/{y}.png',
+                attributions: '© 国土地理院',
+                maxZoom: 15
+            }),
+            visible: false,
+            properties: { title: '傾斜量図' }
+        });
+        
+        // ⭐⭐⭐ 地図に追加！！ ⭐⭐⭐
+        if (window.map) {
+            map.addLayer(googleSatellite);
+            map.addLayer(slopeMap);
+            map.addLayer(gsiPale);
+            map.addLayer(gsiPhoto);
+            map.addLayer(googleHybrid);
+            map.addLayer(googleRoads);
+            map.addLayer(osmLayer);
+            map.addLayer(csMap);
+            map.addLayer(reliefMap);
+            
+            // レイヤーコントロールに追加
+            setTimeout(() => {
+                const layerControl = document.querySelector('.layer-control');
+                if (layerControl) {
+                    // 透明度スライダーの前に追加
+                    const opacityDiv = layerControl.querySelector('div[style*="margin-top: 15px;"]');
+                    
+                    // Google衛星
+                    const googleItem = document.createElement('div');
+                    googleItem.className = 'layer-item';
+                    googleItem.innerHTML = `
+                        <div class="layer-info">
+                            <div class="layer-icon">🌍</div>
+                            <div>
+                                <p style="font-weight: 500;">Google衛星画像</p>
+                                <p style="font-size: 12px; color: #666;">© Google</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="googleSatToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    `;
+                    
+                    // 傾斜量図
+                    const slopeItem = document.createElement('div');
+                    slopeItem.className = 'layer-item';
+                    slopeItem.innerHTML = `
+                        <div class="layer-info">
+                            <div class="layer-icon">🏔️</div>
+                            <div>
+                                <p style="font-weight: 500;">傾斜量図</p>
+                                <p style="font-size: 12px; color: #666;">© 国土地理院</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="slopeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    `;
+                    
+                    // 挿入
+                    layerControl.insertBefore(googleItem, opacityDiv);
+                    layerControl.insertBefore(slopeItem, opacityDiv);
+                    
+                    // イベント設定
+                    document.getElementById('googleSatToggle').addEventListener('change', function() {
+                        googleSatellite.setVisible(this.checked);
+                    });
+                    
+                    document.getElementById('slopeToggle').addEventListener('change', function() {
+                        slopeMap.setVisible(this.checked);
+                    });
+                }
+            }, 1000);
+        }
+        
+    </script>    
 
     <!-- GeoTIFFマネージャー追加 -->
     <script src="railway-geotiff.js"></script>
@@ -1398,8 +3663,240 @@
     </script>
 
     <!-- ★★★ ここに追加！ ★★★ -->
-    <script src="railway-progress-bar.js"></script>
+    <script src="railway-progress-bar.js"></script>$
     <script src="railway-settings.js"></script>
+    <script src="railway-modal.js"></script>
+    <script src="railway-track-selector.js"></script>
+    
+    <!-- ページ読み込み時に登録済みデータを表示 -->
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                RegistrationManager.updateSidebarList();
+                RegistrationManager.loadAllMarkers();
+                console.log('登録済みリスト&マーカー更新！');
                 
+                // ⭐⭐⭐ GeoTIFF自動読み込み追加！ ⭐⭐⭐
+                if (window.GeoTIFFManager) {
+                    GeoTIFFManager.autoLoadFromStorage();
+                    console.log('GeoTIFF自動読み込みチェック！');
+                }
+            }, 1500);  // ← 1000から1500に変更（地図の初期化を待つため）
+        });
+// ⭐⭐⭐ レイヤーシステム完全修正パッチ by みく ⭐⭐⭐
+        // これを既存のコードの後に追加するだけ！！
+        
+        // 1. レイヤー表示修正（constをwindowに）
+        setTimeout(() => {
+            // Google衛星画像の修正
+            if (typeof googleSatellite !== 'undefined' && !window.googleSatellite) {
+                window.googleSatellite = googleSatellite;
+            }
+            
+            // 傾斜量図の修正
+            if (typeof slopeMap !== 'undefined' && !window.slopeMap) {
+                window.slopeMap = slopeMap;
+            }
+            
+            console.log('レイヤー変数を修正しました');
+        }, 500);
+        
+        // 2. toggleLayerVisibility関数のバグ修正
+        const originalToggleLayerVisibility = window.toggleLayerVisibility;
+        window.toggleLayerVisibility = function(layerId, visible) {
+            switch(layerId) {
+                case 'relief':
+                    if (window.reliefMap) window.reliefMap.setVisible(visible);  // window.を追加
+                    break;
+                case 'google-sat':
+                    if (window.googleSatellite) window.googleSatellite.setVisible(visible);
+                    break;
+                case 'slope':
+                    if (window.slopeMap) window.slopeMap.setVisible(visible);
+                    break;
+                default:
+                    // 元の関数を呼ぶ
+                    if (originalToggleLayerVisibility) {
+                        originalToggleLayerVisibility(layerId, visible);
+                    }
+            }
+        };
+        
+        // 3. setupLayerTreeEvents修正（排他制御を削除）
+        window.setupLayerTreeEvents = function() {
+            document.querySelectorAll('.layer-item-tree input').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const layerId = this.closest('.layer-item-tree').dataset.layerId;
+                    
+                    // 排他制御を削除！！全レイヤー独立して動作
+                    toggleLayerVisibility(layerId, this.checked);
+                    
+                    // 状態を保存
+                    const states = {};
+                    document.querySelectorAll('.layer-item-tree input[type="checkbox"]').forEach(cb => {
+                        states[cb.id] = cb.checked;
+                    });
+                    localStorage.setItem('layerStates', JSON.stringify(states));
+                });
+            });
+            
+            console.log('レイヤーイベント設定完了（排他制御なし）');
+        };
+        
+        // 4. createLayerTabContent修正（透明度スライダー追加）
+        const originalCreateLayerTabContent = window.createLayerTabContent;
+        window.createLayerTabContent = function() {
+            let content = originalCreateLayerTabContent();
+            
+            // 各レイヤーアイテムに透明度スライダーを追加
+            content = content.replace(/<\/label>\s*<\/div>/g, function(match) {
+                return `</label>
+                        <input type="range" class="opacity-slider" min="0" max="100" value="100" 
+                               style="width: 60px; margin-left: auto;">
+                    </div>`;
+            });
+            
+            // GeoTIFFのdisabled追加
+            content = content.replace(
+                'id="tree-geotiff"',
+                'id="tree-geotiff" disabled'
+            );
+            
+            return content;
+        };
+        
+// 5. 透明度スライダーのイベント設定
+        const originalSetupLayerTreeEvents = window.setupLayerTreeEvents;
+        window.setupLayerTreeEvents = function() {
+            originalSetupLayerTreeEvents();
+            
+            // 透明度スライダーのイベント
+            document.querySelectorAll('.opacity-slider').forEach(slider => {
+                slider.addEventListener('input', function(e) {
+                    e.stopPropagation();
+                    const layerItem = this.closest('.layer-item-tree');
+                    const layerId = layerItem.dataset.layerId;
+                    const opacity = this.value / 100;
+                    
+                    // 各レイヤーの透明度設定
+                    switch(layerId) {
+                        case 'gsi-std':
+                            map.getLayers().item(0).setOpacity(opacity);
+                            break;
+                        case 'gsi-pale':
+                            if (window.gsiPale) window.gsiPale.setOpacity(opacity);
+                            break;
+                        case 'gsi-photo':
+                            if (window.gsiPhoto) window.gsiPhoto.setOpacity(opacity);
+                            break;
+                        case 'google-sat':
+                            if (window.googleSatellite) window.googleSatellite.setOpacity(opacity);
+                            break;
+                        case 'google-hybrid':
+                            if (window.googleHybrid) window.googleHybrid.setOpacity(opacity);
+                            break;
+                        case 'google-roads':
+                            if (window.googleRoads) window.googleRoads.setOpacity(opacity);
+                            break;
+                        case 'osm':
+                            if (window.osmLayer) window.osmLayer.setOpacity(opacity);
+                            break;
+                        case 'slope':
+                            if (window.slopeMap) window.slopeMap.setOpacity(opacity);
+                            break;
+                        case 'cs-map':
+                            if (window.csMap) window.csMap.setOpacity(opacity);
+                            break;
+                        case 'relief':
+                            if (window.reliefMap) window.reliefMap.setOpacity(opacity);
+                            break;
+                        case 'geotiff':
+                            if (window.GeoTIFFManager?.tiffLayer) {
+                                window.GeoTIFFManager.tiffLayer.setOpacity(opacity);
+                            }
+                            break;
+                        case 'registrations':
+                            if (window.RegistrationManager?.vectorLayer) {
+                                window.RegistrationManager.vectorLayer.setOpacity(opacity);
+                            }
+                            break;
+                    }
+                    
+                    console.log(`${layerId}の透明度: ${this.value}%`);
+                });
+            });
+        };
+        
+        // 6. タブ切り替え時の状態保持
+        const originalSwitchTab2 = window.switchTab;
+        window.switchTab = function(tab) {
+            // レイヤータブから離れる時
+            if (document.querySelector('.tab.active')?.textContent === 'レイヤー') {
+                const states = {};
+                document.querySelectorAll('.layer-item-tree input[type="checkbox"]').forEach(cb => {
+                    states[cb.id] = cb.checked;
+                });
+                localStorage.setItem('layerStates', JSON.stringify(states));
+            }
+            
+            // 元の処理
+            originalSwitchTab2(tab);
+            
+            // レイヤータブに戻った時
+            if (tab === 'layers') {
+                setTimeout(() => {
+                    const saved = localStorage.getItem('layerStates');
+                    if (saved) {
+                        const states = JSON.parse(saved);
+                        Object.entries(states).forEach(([id, checked]) => {
+                            const cb = document.getElementById(id);
+                            if (cb) {
+                                cb.checked = checked;
+                                const layerId = cb.closest('.layer-item-tree').dataset.layerId;
+                                toggleLayerVisibility(layerId, checked);
+                            }
+                        });
+                    }
+                }, 100);
+            }
+        };
+        
+        // 7. 登録地点レイヤーの初期化
+        setTimeout(() => {
+            if (window.RegistrationManager && !window.RegistrationManager.vectorLayer) {
+                console.log('登録地点レイヤーを初期化します');
+                window.RegistrationManager.loadAllMarkers();
+            }
+        }, 2000);
+        
+        console.log('🎉 レイヤーシステム完全修正パッチ適用完了！！');
+        // GeoTIFF読み込み時のズーム制限（最終手段）
+        const originalFit = ol.View.prototype.fit;
+        ol.View.prototype.fit = function(geometry, options) {
+            options = options || {};
+            options.maxZoom = Math.min(options.maxZoom || 28, 18);
+            return originalFit.call(this, geometry, options);
+        };        
+        
+    </script>
+    
+<!-- 汎用モーダル -->
+<div id="universalModal" class="modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">タイトル</h3>
+                <button class="modal-close" onclick="ModalManager.close()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 動的コンテンツ -->
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <!-- 動的ボタン -->
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

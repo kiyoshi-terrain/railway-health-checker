@@ -69,6 +69,35 @@ const RegistrationManager = {
         if (photoInput) {
             photoInput.addEventListener('change', (e) => this.handlePhotoUpload(e));
         }
+        
+        // カメラ入力の追加
+        const cameraInput = document.getElementById('cameraInput');
+        if (cameraInput) {
+            cameraInput.addEventListener('change', (e) => this.handlePhotoUpload(e));
+        }
+        
+        // ドラッグ&ドロップの設定
+        const dropZone = document.getElementById('dropZone');
+        if (dropZone) {
+            dropZone.addEventListener('click', () => {
+                document.getElementById('photoInput').click();
+            });
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                this.handleDroppedFiles(e.dataTransfer.files);
+            });
+        }
     },
     
     // 新規登録開始
@@ -271,36 +300,74 @@ const RegistrationManager = {
         return true;
     },
     
-    // 写真アップロード処理
+// 写真アップロード処理
     handlePhotoUpload(event) {
         const files = event.target.files;
-        const preview = document.getElementById('photoPreview');
         
         for (let file of files) {
             if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                
-                reader.onload = (e) => {
-                    // サムネイル作成
-                    const thumb = document.createElement('div');
-                    thumb.className = 'photo-thumb';
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    thumb.appendChild(img);
-                    
-                    preview.appendChild(thumb);
-                    
-                    // データに追加
-                    this.formData.photos.push({
-                        name: file.name,
-                        data: e.target.result
-                    });
-                };
-                
-                reader.readAsDataURL(file);
+                this.processImageFile(file);
             }
         }
+        
+        // inputをリセット（同じファイルを再選択できるように）
+        event.target.value = '';
+    },
+
+    // ドロップされたファイルの処理
+    handleDroppedFiles(files) {
+        const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+        
+        if (validFiles.length === 0) {
+            alert('画像ファイルのみアップロード可能です');
+            return;
+        }
+        
+        validFiles.forEach(file => {
+            this.processImageFile(file);
+        });
+    },
+    
+    // 画像ファイルを処理（共通化）
+    processImageFile(file) {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            // プレビュー作成
+            const preview = document.getElementById('photoPreview');
+            const thumb = document.createElement('div');
+            thumb.className = 'photo-thumb';
+            
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = () => {
+                thumb.remove();
+                // formDataからも削除
+                const index = this.formData.photos.findIndex(p => p.data === e.target.result);
+                if (index > -1) {
+                    this.formData.photos.splice(index, 1);
+                }
+            };
+            
+            thumb.appendChild(img);
+            thumb.appendChild(removeBtn);
+            preview.appendChild(thumb);
+            
+            // データに追加
+            this.formData.photos.push({
+                name: file.name,
+                data: e.target.result,
+                timestamp: new Date().toISOString()
+            });
+            
+            console.log(`写真追加: ${file.name}`);
+        };
+        
+        reader.readAsDataURL(file);
     },
     
     // 保存処理
@@ -482,6 +549,11 @@ RegistrationManager.addMarkerToMap = function(data) {
     
     // 進行バー付きスタイルを適用
     feature.setStyle(progressBar.createMarkerStyle(data));
+
+    // クリックイベント用にIDを保存
+    feature.set('registrationId', reg.id);
+
+    window.registeredPointsLayer.getSource().addFeature(feature);
     
     // 専用レイヤーに追加
     if (!window.registeredPointsLayer) {
@@ -493,5 +565,329 @@ RegistrationManager.addMarkerToMap = function(data) {
     }
     
     window.registeredPointsLayer.getSource().addFeature(feature);
+    
+    // ★★★ マーカークリックイベントを設定 ★★★
+        this.map.on('click', async (evt) => {
+            // クリックした位置にあるフィーチャーを取得
+            const feature = this.map.forEachFeatureAtPixel(evt.pixel, (feature) => {
+                return feature;
+            });
+            
+            // 登録地点のフィーチャーなら詳細表示
+            if (feature && feature.get('registrationId')) {
+                const id = feature.get('registrationId');
+                await this.viewDetails(id);
+                evt.stopPropagation(); // イベントの伝播を止める
+            }
+        });
+        
+        // マウスオーバーでカーソル変更
+        this.map.on('pointermove', (evt) => {
+            const hit = this.map.hasFeatureAtPixel(evt.pixel);
+            this.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+        });
+
     console.log('マーカー追加完了！', data.id);
+};
+
+// ==================== 登録データ一覧表示機能 ====================
+
+// 登録済みデータを全て取得
+RegistrationManager.getAllRegistrations = async function() {
+    try {
+        const db = await this.initDatabase();
+        const transaction = db.transaction(['registrations'], 'readonly');
+        const store = transaction.objectStore('registrations');
+        
+        return new Promise((resolve, reject) => {
+            const request = store.getAll();
+            request.onsuccess = () => {
+                console.log('登録データ取得:', request.result);
+                resolve(request.result);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    } catch (error) {
+        console.error('データ取得エラー:', error);
+        return [];
+    }
+};
+
+// サイドバーのリストを更新
+RegistrationManager.updateSidebarList = async function() {
+    const registrations = await this.getAllRegistrations();
+    const listContainer = document.getElementById('registrationsList');
+    
+    if (!listContainer) {
+        console.warn('リストコンテナが見つかりません');
+        return;
+    }
+    
+    if (registrations.length === 0) {
+        listContainer.innerHTML = `
+            <p style="text-align: center; color: #999; padding: 20px;">
+                登録データはありません
+            </p>
+        `;
+        return;
+    }
+    
+    // リストHTML生成
+    const listHTML = registrations.map(reg => `
+        <div class="registration-item" data-id="${reg.id}">
+            <div class="reg-header">
+                <span class="reg-id ${reg.type.toLowerCase()}-type">${reg.id}</span>
+                <span class="reg-grade grade-${reg.grade || 'none'}">${reg.grade || '-'}</span>
+            </div>
+            <div class="reg-info">
+                <div class="reg-location">${reg.kilometer ? reg.kilometer + 'km' : '位置情報なし'}</div>
+                <div class="reg-date">${new Date(reg.timestamp).toLocaleDateString()}</div>
+            </div>
+            <div class="reg-actions">
+                <button onclick="RegistrationManager.zoomToPoint('${reg.id}')" title="地図で表示">📍</button>
+                <button onclick="RegistrationManager.editRegistration('${reg.id}')" title="編集">✏️</button>
+                <button onclick="RegistrationManager.deleteRegistration('${reg.id}')" title="削除">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+    
+    listContainer.innerHTML = listHTML;
+};
+
+// 地図で該当地点にズーム
+RegistrationManager.zoomToPoint = async function(id) {
+    const registrations = await this.getAllRegistrations();
+    const target = registrations.find(r => r.id === id);
+    
+    if (target && target.coords) {
+        const view = this.map.getView();
+        
+        // スムーズにズーム＆移動
+        view.animate({
+            center: target.coords.webMercator,
+            zoom: 18,
+            duration: 1000
+        });
+        
+        // マーカーを点滅させる（目立たせる）
+        setTimeout(() => {
+            // 該当マーカーを探す
+            const layers = this.map.getLayers().getArray();
+            layers.forEach(layer => {
+                if (layer instanceof ol.layer.Vector) {
+                    const features = layer.getSource().getFeatures();
+                    features.forEach(feature => {
+                        if (feature.get('id') === id) {
+                            // 元のスタイルを保存
+                            const originalStyle = feature.getStyle();
+                            
+                            // 点滅アニメーション（3回）
+                            let count = 0;
+                            const blink = setInterval(() => {
+                                if (count >= 6) {
+                                    clearInterval(blink);
+                                    feature.setStyle(originalStyle);
+                                    return;
+                                }
+                                
+                                // 表示/非表示を切り替え
+                                feature.setStyle(count % 2 === 0 ? null : originalStyle);
+                                count++;
+                            }, 300);
+                        }
+                    });
+                }
+            });
+        }, 1000); // ズーム完了後に点滅開始
+        
+        console.log(`地点 ${id} にズーム！`);
+    } else {
+        alert('地点情報が見つかりません');
+    }
+};
+
+// 保存済みの全マーカーを地図に表示
+RegistrationManager.loadAllMarkers = async function() {
+    try {
+        const registrations = await this.getAllRegistrations();
+        console.log(`${registrations.length}件のマーカーを読み込み中...`);
+        
+        // 専用レイヤーがなければ作成
+        if (!window.registeredPointsLayer) {
+            window.registeredPointsLayer = new ol.layer.Vector({
+                source: new ol.source.Vector(),
+                zIndex: 200
+            });
+            this.map.addLayer(window.registeredPointsLayer);
+        } else {
+            // 既存のマーカーをクリア
+            window.registeredPointsLayer.getSource().clear();
+        }
+        
+        // 各登録データにマーカーを追加
+        const progressBar = new HealthProgressBar();
+        registrations.forEach(reg => {
+            if (reg.coords && reg.coords.webMercator) {
+                const feature = new ol.Feature({
+                    geometry: new ol.geom.Point(reg.coords.webMercator),
+                    ...reg
+                });
+                
+                // 進行バー付きスタイルを適用
+                feature.setStyle(progressBar.createMarkerStyle(reg));
+
+                // IDを明示的に設定
+                feature.set('id', reg.id);
+                
+                window.registeredPointsLayer.getSource().addFeature(feature);
+            }
+        });
+        
+        console.log('全マーカー表示完了！');
+    } catch (error) {
+        console.error('マーカー読み込みエラー:', error);
+    }
+};
+
+// ★★★ マーカークリックイベントを設定 ★★★
+        this.map.on('click', async (evt) => {
+            const feature = this.map.forEachFeatureAtPixel(evt.pixel, (feature) => {
+                return feature;
+            });
+            
+            if (feature && feature.get('id')) {
+                const id = feature.get('id');
+                await RegistrationManager.viewDetails(id);
+            }
+        });
+        
+        // マウスオーバーでカーソル変更
+        this.map.on('pointermove', (evt) => {
+            const hit = this.map.hasFeatureAtPixel(evt.pixel);
+            this.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+        });
+
+
+// ==================== 削除・編集機能 ====================
+
+// 登録データの削除
+RegistrationManager.deleteRegistration = async function(id) {
+    // 確認ダイアログ
+    if (!confirm(`${id} を削除してもよろしいですか？\nこの操作は取り消せません。`)) {
+        return;
+    }
+    
+    try {
+        // 1. IndexedDBから削除
+        const db = await this.initDatabase();
+        const transaction = db.transaction(['registrations'], 'readwrite');
+        const store = transaction.objectStore('registrations');
+        
+        await store.delete(id);
+        
+        // 2. 地図からマーカーを削除
+        if (window.registeredPointsLayer) {
+            const source = window.registeredPointsLayer.getSource();
+            const features = source.getFeatures();
+            
+            // 該当IDのfeatureを探して削除
+            features.forEach(feature => {
+                if (feature.get('id') === id) {
+                    source.removeFeature(feature);
+                }
+            });
+        }
+        
+        // 3. サイドバーリストを更新
+        await this.updateSidebarList();
+        
+        console.log(`✅ ${id} を削除しました`);
+        alert(`${id} を削除しました`);
+        
+    } catch (error) {
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました');
+    }
+};
+
+// 編集機能（モーダル経由）
+RegistrationManager.editRegistration = function(id) {
+    RegistrationManager.viewDetails(id);  // thisじゃなくてRegistrationManagerを直接使う！
+};
+
+// クリップボードから貼り付け（グローバル関数として）
+RegistrationManager.pasteFromClipboard = async function() {
+    try {
+        const clipboardItems = await navigator.clipboard.read();
+        
+        for (const clipboardItem of clipboardItems) {
+            for (const type of clipboardItem.types) {
+                if (type.startsWith('image/')) {
+                    const blob = await clipboardItem.getType(type);
+                    const file = new File([blob], `clipboard_${Date.now()}.png`, { type });
+                    this.processImageFile(file);
+                }
+            }
+        }
+    } catch (err) {
+        // 権限がない場合やクリップボードが空の場合
+        alert('クリップボードから画像を読み取れませんでした。\n画像をコピーしてから再度お試しください。');
+        console.error('クリップボードエラー:', err);
+    }
+};
+
+// データ更新機能
+RegistrationManager.updateRegistration = async function(data) {
+    try {
+        const db = await this.initDatabase();
+        const transaction = db.transaction(['registrations'], 'readwrite');
+        const store = transaction.objectStore('registrations');
+        
+        const request = store.put(data);
+        
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => {
+                console.log('更新成功！ID:', data.id);
+                resolve(data.id);
+            };
+            
+            request.onerror = () => {
+                console.error('更新エラー:', request.error);
+                reject(request.error);
+            };
+        });
+    } catch (error) {
+        console.error('DB更新エラー:', error);
+        throw error;
+    }
+};
+
+// IDでデータ取得
+RegistrationManager.getRegistrationById = async function(id) {
+    try {
+        const db = await this.initDatabase();
+        const transaction = db.transaction(['registrations'], 'readonly');
+        const store = transaction.objectStore('registrations');
+        
+        return new Promise((resolve, reject) => {
+            const request = store.get(id);
+            request.onsuccess = () => {
+                resolve(request.result);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    } catch (error) {
+        console.error('データ取得エラー:', error);
+        return null;
+    }
+};
+
+// 詳細表示（統一関数）
+RegistrationManager.viewDetails = async function(id) {
+    const data = await this.getRegistrationById(id);
+    if (data) {
+        ModalManager.open(ModalManager.modes.VIEW, data);
+    } else {
+        alert('データが見つかりません');
+    }
 };

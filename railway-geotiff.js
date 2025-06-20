@@ -83,8 +83,8 @@ const GeoTIFFManager = {
     async handleFile(file) {
         console.log(`Processing GeoTIFF: ${file.name}`);
             
-    // ファイル名を保存
-    this.currentFileName = file.name;
+        // ファイル名を保存
+        this.currentFileName = file.name;
     
         try {
             // プログレス表示
@@ -181,8 +181,8 @@ const GeoTIFFManager = {
         canvas.width = width;
         canvas.height = height;
             
-    // この行を追加！
-    this.currentCanvas = canvas;
+        // この行を追加！
+        this.currentCanvas = canvas;
     
         return canvas;
     },
@@ -274,6 +274,9 @@ const GeoTIFFManager = {
             zIndex: 10
         });
         
+        // ⭐ これも追加！
+        this.currentLayer = this.tiffLayer;        
+        
         // ベースマップのzIndexを設定
         this.map.getLayers().forEach((layer, index) => {
             if (index === 0) {
@@ -283,6 +286,14 @@ const GeoTIFFManager = {
                 
         // 地図に追加
         this.map.addLayer(this.tiffLayer);
+        // ⭐⭐⭐ ここに追加！！ ⭐⭐⭐
+        // レイヤータブのチェックボックスを有効化
+        const geotiffCheckbox = document.getElementById('tree-geotiff');
+        if (geotiffCheckbox) {
+            geotiffCheckbox.checked = true;
+            geotiffCheckbox.disabled = false;
+        }
+                
         
         // 初期表示は広域で
         const currentZoom = this.map.getView().getZoom();
@@ -292,12 +303,19 @@ const GeoTIFFManager = {
         
         // タイルが読み込まれてからフィット
         setTimeout(() => {
-            // ビューを画像範囲にフィット
-            this.map.getView().fit(extent, {
-                padding: [50, 50, 50, 50],
-                duration: 1000
-            });
-        }, 500);  // タイル読み込みを待つ
+            // 一旦タイルが存在するズームに
+            this.map.getView().setZoom(18);
+            
+            // タイル読み込み後に元のズームへ
+            setTimeout(() => {
+                this.map.getView().fit(extent, {
+                    padding: [50, 50, 50, 50],
+                    maxZoom: 18,  // ← ベースマップの限界
+                    duration: 0
+                });
+                
+            }, 100);
+        }, 500);
         
         // さらに遅延して最終調整
         setTimeout(() => {
@@ -308,19 +326,97 @@ const GeoTIFFManager = {
                 }
             });
             this.map.renderSync();
+            
+            // ⭐ ここに追加！！
+            if (this.map.getView().getZoom() > 18) {
+                this.map.getView().setZoom(18);
+            }            
         }, 2000);
                 
         // レイヤートグルをONに
         document.getElementById('tiffToggle').checked = true;
-        
-        // 地図を強制的に再描画（これを追加！）
-        setTimeout(() => {
-            this.map.updateSize();
-            this.map.renderSync();
-        }, 100);        
+
+        // ⭐ LocalStorageに保存！ ⭐
+        this.saveToLocalStorage(canvas.toDataURL(), bbox, projection);
     },
     
-
+    // 保存メソッド追加
+    saveToLocalStorage(dataUrl, bbox, projection) {
+        const geotiffData = {
+            dataUrl: dataUrl,
+            bbox: bbox,
+            projection: projection,
+            fileName: this.currentFileName,
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('savedGeoTIFF', JSON.stringify(geotiffData));
+        console.log('GeoTIFF saved to LocalStorage');
+    },
+    
+    // 自動読み込みメソッド追加
+    autoLoadFromStorage() {
+        const saved = localStorage.getItem('savedGeoTIFF');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                console.log('Auto-loading saved GeoTIFF:', data.fileName);
+                
+                // 座標変換
+                const extent = ol.proj.transformExtent(
+                    data.bbox,
+                    ol.proj.get(data.projection),
+                    this.map.getView().getProjection()
+                );
+                
+                // ソース作成
+                this.tiffSource = new ol.source.ImageStatic({
+                    url: data.dataUrl,
+                    imageExtent: extent,
+                    projection: this.map.getView().getProjection()
+                });
+                
+                // レイヤー作成
+                this.tiffLayer = new ol.layer.Image({
+                    source: this.tiffSource,
+                    opacity: 0.7,
+                    zIndex: 10,
+                    visible: true  // 最初から表示！
+                });
+                this.currentLayer = this.tiffLayer;
+                
+                // 地図に追加
+                this.map.addLayer(this.tiffLayer);
+                
+        // レイヤータブのチェックボックスを有効化
+        const geotiffCheckbox = document.getElementById('tree-geotiff');
+        if (geotiffCheckbox) {
+            geotiffCheckbox.checked = true;
+            geotiffCheckbox.disabled = false;
+        }
+        
+        // メインのトグルも更新
+        const tiffToggle = document.getElementById('tiffToggle');
+        if (tiffToggle) tiffToggle.checked = true;
+        
+        // LocalStorageにも保存
+        const states = JSON.parse(localStorage.getItem('layerStates') || '{}');
+        states['tree-geotiff'] = true;
+        localStorage.setItem('layerStates', JSON.stringify(states));
+                
+                // アップロードエリアも更新
+                this.showSuccess(`前回のGeoTIFF (${data.fileName}) を自動読み込みしました`);
+                
+                // ⭐ setTimeoutはここ！関数の中！ ⭐
+                setTimeout(() => {
+                    this.map.updateSize();
+                    this.map.renderSync();
+                }, 100);
+                
+            } catch (error) {
+                console.error('Failed to load saved GeoTIFF:', error);
+            }
+        }
+    },
 
     // プログレス表示
     showProgress(message) {
@@ -343,11 +439,52 @@ const GeoTIFFManager = {
             <div style="text-align: center;">
                 <div style="font-size: 32px; color: #4caf50;">✅</div>
                 <p style="font-weight: 600; margin: 10px 0 5px; color: #4caf50;">${message}</p>
-                <button onclick="GeoTIFFManager.resetUploadArea()" style="margin-top: 10px; padding: 8px 16px; background: #2a5298; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                    別のファイルを選択
-                </button>
+                <div style="margin-top: 10px;">
+                    <button onclick="GeoTIFFManager.resetUploadArea()" style="
+                        padding: 8px 16px; 
+                        background: #2a5298; 
+                        color: white; 
+                        border: none; 
+                        border-radius: 6px; 
+                        cursor: pointer;
+                        margin-right: 10px;
+                    ">
+                        別のファイルを選択
+                    </button>
+                    <button onclick="GeoTIFFManager.clearGeoTIFF()" style="
+                        padding: 8px 16px; 
+                        background: #f44336; 
+                        color: white; 
+                        border: none; 
+                        border-radius: 6px; 
+                        cursor: pointer;
+                    ">
+                        🗑️ 削除
+                    </button>
+                </div>
             </div>
         `;
+    },
+    
+    // 削除メソッド
+    clearGeoTIFF() {
+        if (this.tiffLayer) {
+            this.map.removeLayer(this.tiffLayer);
+            this.tiffLayer = null;
+            this.currentLayer = null;
+        }
+        
+        // LocalStorageもクリア
+        localStorage.removeItem('savedGeoTIFF');
+        
+        // UI更新
+        document.getElementById('tiffToggle').checked = false;
+        const geotiffCheckbox = document.getElementById('tree-geotiff');
+        if (geotiffCheckbox) {
+            geotiffCheckbox.checked = false;
+        }
+        
+        this.resetUploadArea();
     },
     
     // エラーメッセージ
