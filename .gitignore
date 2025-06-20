@@ -1,2 +1,7 @@
 .vercel
 .DS_Store
+.DS_Store
+DEM1A/
+kitakurihama_dem*/
+*.csv
+*.xml
